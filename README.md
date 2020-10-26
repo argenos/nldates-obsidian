@@ -1,22 +1,19 @@
-## Obsidian Sample Plugin
+# nldates-obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
+To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut (default `CTRL + Y`) or the command palette (`Ctrl + P`).
+For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first.
 
-This project uses Typescript to provide type checking and documentation.
-The repo contains the latest plugin API (obsidian.d.ts) in Typescript Definition format, which contains TSDoc comments describing what it does.
+![fuzzy-dates](https://user-images.githubusercontent.com/5426039/89716767-1d768700-d9b0-11ea-99cf-b3bb6846a872.gif)
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+You can try with any of the standard dates, i.e. today, tomorrow, in 3 weeks, in 5 months, etc.
+The only behaviours I changed were the following:
 
-### How to use
+| Write | Date |
+| ----- | ---- |
+|   next week    | next Monday      |
+|   next [month]    |  1st of next month     |
+|   mid [month]   | 15th of the month      |
+|   end of [month]    |  last day of the month     |
 
-- Clone this repo.
-- `npm i` or `yarn` to install dependencies
-- `npm run dev` to start compilation in watch mode.
-
-### How to install the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `vault/.obsidian/plugins/plugin-id/`.
-
-### API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
+If a date is not recognized, the link won't be created.
