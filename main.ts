@@ -1,77 +1,140 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {
+  App,
+  Modal,
+  Notice,
+  Plugin,
+  PluginSettingTab,
+  Setting,
+} from "obsidian";
 
-export default class MyPlugin extends Plugin {
-	onInit() {
+import chrono from "chrono-node";
 
-	}
+var getLastDayOfMonth = function (y: any, m: any) {
+  return new Date(y, m, 0).getDate();
+};
 
-	onload() {
-		console.log('loading plugin');
+var nextDate = new RegExp(/next\s(w+)/, "gi");
 
-		this.addRibbonIcon('dice', 'Sample Plugin', () => {
-			new Notice('This is a notice!');
-		});
+const custom = chrono.casual.clone();
 
-		this.addStatusBarItem().setText('Status Bar Text');
+custom.parsers.push({
+  pattern: () => {
+    return /\bChristmas\b/i;
+  },
+  extract: (context: any, match: RegExpMatchArray) => {
+    return {
+      day: 25,
+      month: 12,
+    };
+  },
+});
 
-		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
-				}
-				return false;
-			}
-		});
+export default class NaturalLanguageDates extends Plugin {
+  onInit() {}
 
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-	}
+  onload() {
+    console.log("Loading natural language date parser plugin");
 
-	onunload() {
-		console.log('unloading plugin');
-	}
-}
+    this.addCommand({
+      id: "nlp-dates",
+      name: "Parse natural language date",
+      callback: () => this.onTrigger(),
+      hotkeys: [{ modifiers: ["Mod"], key: "y" }],
+    });
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+  }
 
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
+  onunload() {
+    console.log("Unloading natural language date parser plugin");
+  }
 
-	onClose() {
-		let {contentEl} = this;
-		contentEl.empty();
-	}
-}
+  getDateString(selectedText: string) {
+    var nextDateMatch = selectedText.match(/next\s([\w]+)/i);
+    var lastDayOfMatch = selectedText.match(
+      /(last day of|end of)\s*([^\n\r]*)/i
+    );
+    var midOf = selectedText.match(/mid\s([\w]+)/i);
 
-class SampleSettingTab extends PluginSettingTab {
-	display(): void {
-		let {containerEl} = this;
+    if (nextDateMatch && nextDateMatch[1] === "week") {
+      return custom.parseDate("next monday", new Date(), {
+        forwardDate: true,
+      });
+    } else if (nextDateMatch && nextDateMatch[1] === "month") {
+      var thisMonth = custom.parseDate("this month", new Date(), {
+        forwardDate: true,
+      });
+      return custom.parseDate(selectedText, thisMonth, {
+        forwardDate: true,
+      });
+    } else if (nextDateMatch && nextDateMatch[1] === "year") {
+      var thisYear = custom.parseDate("this year", new Date(), {
+        forwardDate: true,
+      });
+      return custom.parseDate(selectedText, thisYear, {
+        forwardDate: true,
+      });
+    } else if (lastDayOfMatch) {
+      var tempDate = custom.parse(lastDayOfMatch[2]);
+      var year = tempDate[0].start.get("year"),
+        month = tempDate[0].start.get("month");
+      var lastDay = getLastDayOfMonth(year, month);
+      return custom.parseDate(`${year}-${month}-${lastDay}`, new Date(), {
+        forwardDate: true,
+      });
+    } else if (midOf) {
+      return custom.parseDate(`${midOf[1]} 15th`, new Date(), {
+        forwardDate: true,
+      });
+    } else {
+      return custom.parseDate(selectedText, new Date(), {
+        forwardDate: true,
+      });
+    }
+  }
 
-		containerEl.empty();
+  getSelectedText(editor: any) {
+    if (editor.somethingSelected()) {
+      return editor.getSelection();
+    } else {
+      var wordBoundaries = this.getWordBoundaries(editor);
+      editor.getDoc().setSelection(wordBoundaries.start, wordBoundaries.end);
+      return editor.getSelection();
+    }
+  }
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+  getWordBoundaries(editor: any) {
+    var cursor = editor.getCursor();
+    var line = cursor.line;
+    var word = editor.findWordAt({ line: line, ch: cursor.ch });
+    var wordStart = word.anchor.ch;
+    var wordEnd = word.head.ch;
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text.setPlaceholder('Enter your secret')
-				.setValue('')
-				.onChange((value) => {
-					console.log('Secret: ' + value);
-				}));
+    return {
+      start: { line: line, ch: wordStart },
+      end: { line: line, ch: wordEnd },
+    };
+  }
 
-	}
+  onTrigger() {
+    let activeLeaf: any = this.app.workspace.activeLeaf;
+    let editor = activeLeaf.view.sourceMode.cmEditor;
+    var cursor = editor.getCursor();
+    var selectedText = this.getSelectedText(editor);
+
+    var date = this.getDateString(selectedText);
+
+    if (date) {
+      var isodate = date.toISOString().substring(0, 10);
+      var newStr = `[[${isodate}]]`;
+      editor.replaceSelection(newStr);
+      this.adjustCursor(editor, cursor, newStr, selectedText);
+    } else {
+      editor.setCursor({ line: cursor.line, ch: cursor.ch });
+    }
+  }
+
+  adjustCursor(editor: any, cursor: any, newStr: string, oldStr: string) {
+    var cursorOffset = newStr.length - oldStr.length;
+    editor.setCursor({ line: cursor.line, ch: cursor.ch + cursorOffset });
+  }
 }

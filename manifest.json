@@ -1,7 +1,7 @@
 {
-  "id": "obsidian-sample-plugin",
-  "name": "Sample Plugin",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "id": "nldates-obsidian",
+  "name": "Natural Language Dates Plugin",
+  "description": "Create date-links based on natural language",
   "isDesktopOnly": false,
   "js": "main.js",
   "css": "styles.css"
