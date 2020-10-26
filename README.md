@@ -17,3 +17,8 @@ The only behaviours I changed were the following:
 |   end of [month]    |  last day of the month     |
 
 If a date is not recognized, the link won't be created.
+
+## Installing
+
+Unzip the [latest release](https://github.com/argenos/nldates-obsidian/releases/latest) into your `<vault>/.obsidian/plugins/` folder.
+
