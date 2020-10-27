@@ -8,12 +8,11 @@ import {
 } from "obsidian";
 
 import chrono from "chrono-node";
+import moment from "moment";
 
 var getLastDayOfMonth = function (y: any, m: any) {
   return new Date(y, m, 0).getDate();
 };
-
-var nextDate = new RegExp(/next\s(w+)/, "gi");
 
 const custom = chrono.casual.clone();
 
@@ -124,8 +123,8 @@ export default class NaturalLanguageDates extends Plugin {
     var date = this.getDateString(selectedText);
 
     if (date) {
-      var isodate = date.toISOString().substring(0, 10);
-      var newStr = `[[${isodate}]]`;
+      var momentDate = moment(date).format('YYYY-MM-DD')
+      var newStr = `[[${momentDate}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
     } else {
