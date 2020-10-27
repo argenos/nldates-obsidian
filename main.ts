@@ -30,10 +30,13 @@ custom.parsers.push({
 });
 
 export default class NaturalLanguageDates extends Plugin {
+  settings: NLDSettings;
+
   onInit() {}
 
-  onload() {
+  async onload() {
     console.log("Loading natural language date parser plugin");
+    this.settings = (await this.loadData()) || new NLDSettings();
 
     this.addCommand({
       id: "nlp-dates",
@@ -42,6 +45,7 @@ export default class NaturalLanguageDates extends Plugin {
       hotkeys: [{ modifiers: ["Mod"], key: "y" }],
     });
 
+    this.addSettingTab(new NLDSettingsTab(this.app, this));
   }
 
   onunload() {
@@ -125,7 +129,10 @@ export default class NaturalLanguageDates extends Plugin {
 
     if (date) {
       var isodate = date.toISOString().substring(0, 10);
-      var newStr = `[[${isodate}]]`;
+      var formattedDate = (window as any)
+        .moment(isodate)
+        .format(this.settings.format);
+      var newStr = `[[${formattedDate}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
     } else {
@@ -136,5 +143,35 @@ export default class NaturalLanguageDates extends Plugin {
   adjustCursor(editor: any, cursor: any, newStr: string, oldStr: string) {
     var cursorOffset = newStr.length - oldStr.length;
     editor.setCursor({ line: cursor.line, ch: cursor.ch + cursorOffset });
+  }
+}
+
+class NLDSettings {
+  format: string = "YYYY-MM-DD";
+}
+
+class NLDSettingsTab extends PluginSettingTab {
+  display(): void {
+    let { containerEl } = this;
+    const plugin: any = (this as any).plugin;
+
+    containerEl.empty();
+
+    new Setting(containerEl)
+      .setName("Date format")
+      .setDesc("Output format for parsed dates")
+      .addMomentFormat((text) =>
+        text
+          .setDefaultFormat("YYYY-MM-DD")
+          .setValue(plugin.settings.format)
+          .onChange((value) => {
+            if (value === "") {
+              plugin.settings.format = "YYYY-MM-DD";
+            } else {
+              plugin.settings.format = value.trim();
+            }
+            plugin.saveData(plugin.settings);
+          })
+      );
   }
 }
