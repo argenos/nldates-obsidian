@@ -6,7 +6,6 @@ import {
   PluginSettingTab,
   Setting,
 } from "obsidian";
-
 import chrono from "chrono-node";
 import moment from "moment";
 
@@ -29,10 +28,16 @@ custom.parsers.push({
 });
 
 export default class NaturalLanguageDates extends Plugin {
+  settings: NaturalLanguageDatesSettings;
+  
   onInit() {}
 
-  onload() {
+  async onload() {
     console.log("Loading natural language date parser plugin");
+
+    this.settings = await this.loadData() || new NaturalLanguageDatesSettings();
+
+    this.addSettingTab(new NaturalLanguageDatesSettingsTab(this.app, this));
 
     this.addCommand({
       id: "nlp-dates",
@@ -123,7 +128,7 @@ export default class NaturalLanguageDates extends Plugin {
     var date = this.getDateString(selectedText);
 
     if (date) {
-      var momentDate = moment(date).format('YYYY-MM-DD')
+      var momentDate = moment(date).format(this.settings.dateFormat)
       var newStr = `[[${momentDate}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
@@ -135,5 +140,51 @@ export default class NaturalLanguageDates extends Plugin {
   adjustCursor(editor: any, cursor: any, newStr: string, oldStr: string) {
     var cursorOffset = newStr.length - oldStr.length;
     editor.setCursor({ line: cursor.line, ch: cursor.ch + cursorOffset });
+  }
+}
+
+class NaturalLanguageDatesSettings {
+  dateFormat: string = "YYYY-MM-DD";
+}
+
+class NaturalLanguageDatesSettingsTab extends PluginSettingTab {
+  uPop = document.createElement('b');
+  plugin: any = (this as any).plugin
+
+  display(): void {
+    let { containerEl } = this;
+    this.uPop.className = 'u-pop';
+    containerEl.empty();
+
+    new Setting(containerEl)
+      .setName('Date Format')
+      .setDesc(this.descriptionContent(this.plugin))
+      .addText(text => text.setPlaceholder('Example: YYYY-MM-DD')
+        .setValue((this.plugin.settings.dateFormat || '') + '')
+        .onChange((value) => {
+          this.plugin.settings.dateFormat = value.trim();
+          this.plugin.saveData(this.plugin.settings);
+          this.setCurrentSyntax();
+        }));
+  }
+
+  descriptionContent(plugin: any): DocumentFragment {
+    let descEl = document.createDocumentFragment();
+    descEl.appendText('For more syntax, refer to ')
+    let a = document.createElement('a');
+    a.href = 'https://momentjs.com/docs/#/displaying/format/';
+    a.text = 'format reference';
+    a.target = '_blank';
+    descEl.appendChild(a);
+    descEl.appendChild(document.createElement('br'));
+    descEl.appendText('Your current syntax lookslike this:');
+    descEl.appendChild(document.createElement('br'));
+    this.setCurrentSyntax();
+    descEl.appendChild(this.uPop);
+    return descEl;
+  }
+
+  setCurrentSyntax(): void {
+    this.uPop.innerText = moment().format(this.plugin.settings.dateFormat);
   }
 }
