@@ -1,0 +1,54 @@
+name: Build obsidian plugin
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - '*' # Push events to matching any tag format, i.e. 1.0, 20.15.10
+
+env:
+  PLUGIN_NAME: nldates-obsidian # Change this to the name of your plugin-id folder
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x' # You might need to adjust this value to your own version
+    - run: npm install
+    - run: npm run build --if-present
+    # - run: npm test
+    #   env:
+    #     CI: true
+    - run: |
+        mkdir $PLUGIN_NAME
+        mv main.js manifest.json $PLUGIN_NAME
+        zip -r $PLUGIN_NAME.zip $PLUGIN_NAME
+        echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION: ${{ github.ref }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: v${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./$PLUGIN_NAME-${{ steps.build.outputs.tag_name }}.zip
+        asset_name: $PLUGIN_NAME-${{ steps.build.outputs.tag_name }}.zip
+        asset_content_type: application/zip
+    
