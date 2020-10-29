@@ -25,9 +25,9 @@ jobs:
       run: | 
         npm install
         npm run build --if-present
-        mkdir plugin-release
-        cp main.js manifest.json plugin-release
-        zip -r plugin-release.zip plugin-release
+        mkdir ${{ env.PLUGIN_NAME }}
+        cp main.js manifest.json ${{ env.PLUGIN_NAME }}
+        zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
         ls
         echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
     - name: Create Release
@@ -48,8 +48,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./plugin-release.zip 
-        asset_name: nldates-obsidian-${{ steps.build.outputs.tag_name }}.zip # Change this to your plugin name
+        asset_path: ./${{ env.PLUGIN_NAME }}.zip 
+        asset_name: ${{ env.PLUGIN_NAME }}-${{ steps.build.outputs.tag_name }}.zip 
         asset_content_type: application/zip
     - name: Upload main.js
       id: upload-main
