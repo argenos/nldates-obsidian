@@ -49,7 +49,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./plugin-release.zip 
-        asset_name: $nldates-obsidian-${{ steps.build.outputs.tag_name }}.zip # Change this to your plugin name
+        asset_name: nldates-obsidian-${{ steps.build.outputs.tag_name }}.zip # Change this to your plugin name
         asset_content_type: application/zip
     - name: Upload main.js
       id: upload-main
@@ -57,7 +57,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./main.js
         asset_name: main.js
         asset_content_type: text/javascript
@@ -67,7 +67,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        upload_url: ${{ steps.create_release.outputs.upload_url }} 
         asset_path: ./manifest.json
         asset_name: manifest.json
         asset_content_type: application/json
@@ -77,7 +77,7 @@ jobs:
     #   env:
     #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     #   with:
-    #     upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }} 
     #     asset_path: ./styles.css
     #     asset_name: styles.css
     #     asset_content_type: text/css
