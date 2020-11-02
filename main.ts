@@ -58,7 +58,7 @@ export default class NaturalLanguageDates extends Plugin {
     var midOf = selectedText.match(/mid\s([\w]+)/i);
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return custom.parseDate("next monday", new Date(), {
+      return custom.parseDate(`next ${this.settings.weekStart}`, new Date(), {
         forwardDate: true,
       });
     } else if (nextDateMatch && nextDateMatch[1] === "month") {
@@ -145,6 +145,7 @@ export default class NaturalLanguageDates extends Plugin {
 
 class NLDSettings {
   format: string = "YYYY-MM-DD";
+  weekStart: string = "Monday";
 }
 
 class NLDSettingsTab extends PluginSettingTab {
@@ -167,6 +168,22 @@ class NLDSettingsTab extends PluginSettingTab {
             } else {
               plugin.settings.format = value.trim();
             }
+            plugin.saveData(plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Week starts on")
+      .setDesc("Which day to consider as the start of the week")
+      .addDropdown((day) =>
+        day
+          .setValue(plugin.settings.weekStart)
+          .addOption("Monday", "Monday")
+          .addOption("Sunday", "Sunday")
+          .onChange((value) => {
+            console.log(value);
+            plugin.settings.weekStart = value.trim();
+            console.log(plugin.settings);
             plugin.saveData(plugin.settings);
           })
       );
