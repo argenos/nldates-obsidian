@@ -2,7 +2,7 @@
 
 Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
 To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut (default `CTRL + Y`) or the command palette (`Ctrl + P`).
-For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first.
+For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first. It's also possible to use dates like Nov9, 25Dec to use this trick.
 
 You can try with any of the standard dates, i.e. today, tomorrow, in 3 weeks, in 5 months, etc.
 The only behaviours I changed were the following:
