@@ -13,8 +13,6 @@ var getLastDayOfMonth = function (y: any, m: any) {
   return new Date(y, m, 0).getDate();
 };
 
-var nextDate = new RegExp(/next\s(w+)/, "gi");
-
 const custom = chrono.casual.clone();
 
 custom.parsers.push({
@@ -128,9 +126,8 @@ export default class NaturalLanguageDates extends Plugin {
     var date = this.getDateString(selectedText);
 
     if (date) {
-      var isodate = date.toISOString().substring(0, 10);
       var formattedDate = (window as any)
-        .moment(isodate)
+        .moment(date)
         .format(this.settings.format);
       var newStr = `[[${formattedDate}]]`;
       editor.replaceSelection(newStr);
