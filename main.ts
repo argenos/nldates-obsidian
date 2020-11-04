@@ -118,6 +118,12 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   
+  getFormattedDate(date: any) {
+      var formattedDate = (window as any)
+        .moment(date)
+        .format(this.settings.format);
+        return formattedDate;
+  }
 
   // processDate can be called by other plugins in order to use this plugin's natural language date engine
   // input: the natural language date plugin object (to make sure the function pulls settings from the right place) and some natural language date string
@@ -142,9 +148,7 @@ export default class NaturalLanguageDates extends Plugin {
     var date = this.getDateString(selectedText);
 
     if (date) {
-      var formattedDate = (window as any)
-        .moment(date)
-        .format(this.settings.format);
+      var formattedDate = this.getFormattedDate(date);
       var newStr = `[[${formattedDate}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
