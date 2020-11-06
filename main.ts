@@ -27,6 +27,12 @@ custom.parsers.push({
   },
 });
 
+interface NLDResult {
+  formattedString: string;
+  date: Date;
+  moment: any;
+}
+
 export default class NaturalLanguageDates extends Plugin {
   settings: NLDSettings;
 
@@ -50,7 +56,7 @@ export default class NaturalLanguageDates extends Plugin {
     console.log("Unloading natural language date parser plugin");
   }
 
-  getDateString(selectedText: string) {
+  getParsedDate(selectedText: string): Date {
     var nextDateMatch = selectedText.match(/next\s([\w]+)/i);
     var lastDayOfMatch = selectedText.match(
       /(last day of|end of)\s*([^\n\r]*)/i
@@ -117,12 +123,33 @@ export default class NaturalLanguageDates extends Plugin {
     };
   }
 
+  getMoment(date: Date): any {
+    return (window as any).moment(date);
+  }
+
+  getFormattedDate(date: Date): string {
+    var formattedDate = this.getMoment(date).format(this.settings.format);
+    return formattedDate;
+  }
+
+  /*
+  @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
+  @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
   
-  getFormattedDate(date: any) {
-      var formattedDate = (window as any)
-        .moment(date)
-        .format(this.settings.format);
-        return formattedDate;
+  */
+  parseDate(dateString: string): NLDResult {
+    let date = this.getParsedDate(dateString);
+    let formattedDate = this.getFormattedDate(date);
+    if (formattedDate === "Invalid date") {
+      console.debug("Input date " + dateString + " can't be parsed by nldates");
+    }
+
+    let result = {
+      formattedString: formattedDate,
+      date: date,
+      moment: this.getMoment(date),
+    };
+    return result;
   }
 
   // processDate can be called by other plugins in order to use this plugin's natural language date engine
@@ -145,15 +172,14 @@ export default class NaturalLanguageDates extends Plugin {
     var cursor = editor.getCursor();
     var selectedText = this.getSelectedText(editor);
 
-    var date = this.getDateString(selectedText);
+    let date = this.parseDate(selectedText);
 
-    if (date) {
-      var formattedDate = this.getFormattedDate(date);
-      var newStr = `[[${formattedDate}]]`;
+    if (!date.moment.isValid()) {
+      editor.setCursor({ line: cursor.line, ch: cursor.ch });
+    } else {
+      var newStr = `[[${date.formattedString}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
-    } else {
-      editor.setCursor({ line: cursor.line, ch: cursor.ch });
     }
   }
 
