@@ -180,6 +180,7 @@ export default class NaturalLanguageDates extends Plugin {
       var newStr = `[[${date.formattedString}]]`;
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
+      editor.focus();
     }
   }
 
