@@ -152,20 +152,6 @@ export default class NaturalLanguageDates extends Plugin {
     return result;
   }
 
-  // processDate can be called by other plugins in order to use this plugin's natural language date engine
-  // input: the natural language date plugin object (to make sure the function pulls settings from the right place) and some natural language date string
-  // returns a date string formatted with Obsidian's daily note syntax (via Natural Language Date's settings for this syntax) 
-  processDate(plugin: any, someDate: string) {
-    var _this = plugin;
-    var currentFormat = _this.settings.format;
-    console.log("Current format: " + currentFormat);
-    var date = _this.getDateString(someDate);
-    var formattedDate = (window as any)
-      .moment(date)
-      .format(currentFormat);
-    return formattedDate;
-  }
-
   onTrigger() {
     let activeLeaf: any = this.app.workspace.activeLeaf;
     let editor = activeLeaf.view.sourceMode.cmEditor;
