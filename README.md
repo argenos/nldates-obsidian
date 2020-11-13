@@ -1,4 +1,4 @@
-# nldates-obsidian
+# Natural language dates in Obsidian
 
 Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
 To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut (default `CTRL + Y`) or the command palette (`Ctrl + P`).
@@ -15,6 +15,14 @@ The only behaviours I changed were the following:
 |   end of [month]    |  last day of the month     |
 
 If a date is not recognized, the link won't be created.
+
+## Commands and hotkeys
+
+Starting on v0.3.1, in addition to the hotkey to parse the selected date, the following commands are also available:
+
+<img src="https://user-images.githubusercontent.com/5426039/99106779-154c6a00-25e5-11eb-853c-8745271b3f8e.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
+
+You can of course add hotkeys to each of these commands.
 
 ## Demo
 

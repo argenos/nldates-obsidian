@@ -1,6 +1,7 @@
 import {
   App,
   Modal,
+  MomentFormatComponent,
   Notice,
   Plugin,
   PluginSettingTab,
@@ -47,6 +48,27 @@ export default class NaturalLanguageDates extends Plugin {
       name: "Parse natural language date",
       callback: () => this.onTrigger(),
       hotkeys: [{ modifiers: ["Mod"], key: "y" }],
+    });
+
+    this.addCommand({
+      id: "nlp-now",
+      name: "Insert the current date and time",
+      callback: () => this.getNowCommand(),
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "nlp-today",
+      name: "Insert the current date",
+      callback: () => this.getDateCommand(),
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "nlp-time",
+      name: "Insert the current time",
+      callback: () => this.getTimeCommand(),
+      hotkeys: [],
     });
 
     this.addSettingTab(new NLDSettingsTab(this.app, this));
@@ -174,10 +196,38 @@ export default class NaturalLanguageDates extends Plugin {
     var cursorOffset = newStr.length - oldStr.length;
     editor.setCursor({ line: cursor.line, ch: cursor.ch + cursorOffset });
   }
+
+  getNowCommand() {
+    let activeLeaf: any = this.app.workspace.activeLeaf;
+    let editor = activeLeaf.view.sourceMode.cmEditor;
+    editor.replaceSelection(
+      this.getMoment(new Date()).format(
+        `${this.settings.format}${this.settings.separator}${this.settings.timeFormat}`
+      )
+    );
+  }
+
+  getDateCommand() {
+    let activeLeaf: any = this.app.workspace.activeLeaf;
+    let editor = activeLeaf.view.sourceMode.cmEditor;
+    editor.replaceSelection(
+      this.getMoment(new Date()).format(this.settings.format)
+    );
+  }
+
+  getTimeCommand() {
+    let activeLeaf: any = this.app.workspace.activeLeaf;
+    let editor = activeLeaf.view.sourceMode.cmEditor;
+    editor.replaceSelection(
+      this.getMoment(new Date()).format(this.settings.timeFormat)
+    );
+  }
 }
 
 class NLDSettings {
   format: string = "YYYY-MM-DD";
+  timeFormat: string = "HH:mm";
+  separator: string = " ";
   weekStart: string = "Monday";
 }
 
@@ -220,5 +270,38 @@ class NLDSettingsTab extends PluginSettingTab {
             plugin.saveData(plugin.settings);
           })
       );
+
+    containerEl.createEl('h3', {text: 'Hotkey formatting settings'});
+
+    new Setting(containerEl)
+      .setName("Time format")
+      .setDesc("Format for the hotkeys that include the current time")
+      .addMomentFormat((text) =>
+        text
+          .setDefaultFormat("HH:mm")
+          .setValue(plugin.settings.timeFormat)
+          .onChange((value) => {
+            if (value === "") {
+              plugin.settings.timeFormat = "HH:mm";
+            } else {
+              plugin.settings.format = value.trim();
+            }
+            plugin.saveData(plugin.settings);
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Separator")
+      .setDesc("Separator between date and time for entries that have both")
+      .addText((text) =>
+        text
+          .setPlaceholder("Separator is empty")
+          .setValue(plugin.settings.separator)
+          .onChange((value) => {
+            plugin.settings.separator = value;
+            plugin.saveData(plugin.settings);
+          })
+      );
+
   }
 }
