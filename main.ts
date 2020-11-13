@@ -6,6 +6,10 @@ import {
   Plugin,
   PluginSettingTab,
   Setting,
+  TextComponent,
+  ButtonComponent,
+  MarkdownView,
+  ToggleComponent,
 } from "obsidian";
 
 import chrono from "chrono-node";
@@ -68,6 +72,23 @@ export default class NaturalLanguageDates extends Plugin {
       id: "nlp-time",
       name: "Insert the current time",
       callback: () => this.getTimeCommand(),
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "nlp-search",
+      name: "Date picker",
+      // callback: () => this.getDateRange(),
+      checkCallback: (checking: boolean) => {
+        let leaf = this.app.workspace.activeLeaf;
+        if (leaf) {
+          if (!checking) {
+            new ParseMomentModal(this.app).open();
+          }
+          return true;
+        }
+        return false;
+      },
       hotkeys: [],
     });
 
@@ -222,6 +243,12 @@ export default class NaturalLanguageDates extends Plugin {
       this.getMoment(new Date()).format(this.settings.timeFormat)
     );
   }
+
+  insertDateString(dateString: string, editor: any, cursor: any) {
+    editor.replaceSelection(dateString);
+  }
+
+  getDateRange() {}
 }
 
 class NLDSettings {
@@ -229,6 +256,9 @@ class NLDSettings {
   timeFormat: string = "HH:mm";
   separator: string = " ";
   weekStart: string = "Monday";
+  modalToggleTime: boolean = false;
+  modalToggleLink: boolean = false;
+  modalMomentFormat: string = "YYYY-MM-DD HH:mm";
 }
 
 class NLDSettingsTab extends PluginSettingTab {
@@ -271,7 +301,7 @@ class NLDSettingsTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl('h3', {text: 'Hotkey formatting settings'});
+    containerEl.createEl("h3", { text: "Hotkey formatting settings" });
 
     new Setting(containerEl)
       .setName("Time format")
@@ -302,6 +332,85 @@ class NLDSettingsTab extends PluginSettingTab {
             plugin.saveData(plugin.settings);
           })
       );
+  }
+}
 
+class ParseMomentModal extends Modal {
+  parsedDateString = "";
+  activeView: MarkdownView;
+  activeEditor: CodeMirror.Editor;
+  activeCursor: CodeMirror.Position;
+
+  constructor(app: App) {
+    super(app);
+    this.activeView = this.app.workspace.getActiveLeafOfViewType(MarkdownView);
+    if (!this.activeView) return;
+    this.activeEditor = this.activeView.sourceMode.cmEditor;
+    this.activeCursor = this.activeEditor.getCursor();
+  }
+
+  onOpen() {
+    let nldates = this.app.plugins.getPlugin("nldates-obsidian");
+    let { contentEl } = this;
+    const plugin: any = (this as any).plugin;
+
+    contentEl.appendText("Date: ");
+
+    let inputDateField = new TextComponent(contentEl).setPlaceholder("Date");
+    contentEl.createEl("br");
+    contentEl.appendText("Format: ");
+
+    let momentFormatField = new MomentFormatComponent(contentEl)
+      .setDefaultFormat("YYYY-MM-DD HH:mm")
+      .setValue(nldates.settings.modalMomentFormat)
+      .onChange((value) => {
+        nldates.settings.modalMomentFormat = value ? value : "YYYY-MM-DD HH:mm";
+        nldates.saveData(nldates.settings);
+      });
+
+    contentEl.createEl("br");
+    // contentEl.appendText("Toggle time")
+
+    // let toggleDate = new ToggleComponent(contentEl)
+    // .setValue(nldates.settings.modalToggleTime)
+    // .onChange((value) => {
+    //   nldates.settings.modalToggleTime = value;
+    //   nldates.saveData(nldates.settings);
+    // });
+
+    contentEl.appendText("Add as link?");
+    let toggleLink = new ToggleComponent(contentEl)
+      .setValue(nldates.settings.modalToggleLink)
+      .onChange((value) => {
+        nldates.settings.modalToggleLink = value;
+        nldates.saveData(nldates.settings);
+      });
+    contentEl.createEl("br");
+
+    let inputButton = new ButtonComponent(contentEl)
+      .setButtonText("Insert date")
+      .onClick(() => {
+        let parsedDate = nldates.parseDate(inputDateField.getValue());
+        this.parsedDateString = parsedDate.moment.format(
+          momentFormatField.getValue()
+        );
+        if (!parsedDate.moment.isValid()) this.parsedDateString = "";
+        if (toggleLink.getValue() && this.parsedDateString !== "")
+          this.parsedDateString = `[[${this.parsedDateString}]]`;
+        this.activeEditor.focus();
+        this.activeEditor.setCursor(this.activeCursor);
+        nldates.insertDateString(
+          this.parsedDateString,
+          this.activeEditor,
+          this.activeCursor
+        );
+        this.close();
+      });
+    inputDateField.inputEl.focus();
+  }
+
+  onClose() {
+    let { contentEl } = this;
+    contentEl.empty();
   }
 }

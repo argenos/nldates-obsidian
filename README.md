@@ -20,9 +20,16 @@ If a date is not recognized, the link won't be created.
 
 Starting on v0.3.1, in addition to the hotkey to parse the selected date, the following commands are also available:
 
-<img src="https://user-images.githubusercontent.com/5426039/99106779-154c6a00-25e5-11eb-853c-8745271b3f8e.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
+<img src="https://user-images.githubusercontent.com/5426039/99131199-ccaba580-2612-11eb-8290-95051602c7d3.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
+<br>
 
 You can of course add hotkeys to each of these commands.
+
+### Natural language date picker
+
+<br>
+<img src="https://user-images.githubusercontent.com/5426039/99131292-0d0b2380-2613-11eb-8469-20d510fa2074.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
+
 
 ## Demo
 
