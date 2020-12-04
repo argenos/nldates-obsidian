@@ -401,7 +401,7 @@ class ParseMomentModal extends Modal {
 
   constructor(app: App) {
     super(app);
-    this.activeView = this.app.workspace.getActiveLeafOfViewType(MarkdownView);
+    this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!this.activeView) return;
     this.activeEditor = this.activeView.sourceMode.cmEditor;
     this.activeCursor = this.activeEditor.getCursor();
@@ -427,14 +427,6 @@ class ParseMomentModal extends Modal {
       });
 
     contentEl.createEl("br");
-    // contentEl.appendText("Toggle time")
-
-    // let toggleDate = new ToggleComponent(contentEl)
-    // .setValue(nldates.settings.modalToggleTime)
-    // .onChange((value) => {
-    //   nldates.settings.modalToggleTime = value;
-    //   nldates.saveData(nldates.settings);
-    // });
 
     contentEl.appendText("Add as link?");
     let toggleLink = new ToggleComponent(contentEl)
