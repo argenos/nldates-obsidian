@@ -50,8 +50,22 @@ export default class NaturalLanguageDates extends Plugin {
     this.addCommand({
       id: "nlp-dates",
       name: "Parse natural language date",
-      callback: () => this.onTrigger(),
+      callback: () => this.onTrigger("replace"),
       hotkeys: [{ modifiers: ["Mod"], key: "y" }],
+    });
+
+    this.addCommand({
+      id: "nlp-date-link",
+      name: "Parse natural language date (as link)",
+      callback: () => this.onTrigger("link"),
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "nlp-parse-time",
+      name: "Parse natural language time",
+      callback: () => this.onTrigger("time"),
+      hotkeys: [],
     });
 
     this.addCommand({
@@ -175,6 +189,11 @@ export default class NaturalLanguageDates extends Plugin {
     return formattedDate;
   }
 
+  getFormattedTime(date: Date): string {
+    var formattedTime = this.getMoment(date).format(this.settings.timeFormat);
+    return formattedTime;
+  }  
+
   /*
   @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
   @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
@@ -195,7 +214,22 @@ export default class NaturalLanguageDates extends Plugin {
     return result;
   }
 
-  onTrigger() {
+  parseTime(dateString: string): NLDResult {
+    let date = this.getParsedDate(dateString);
+    let formattedTime = this.getFormattedTime(date);
+    if (formattedTime === "Invalid date") {
+      console.debug("Input date " + dateString + " can't be parsed by nldates");
+    }
+
+    let result = {
+      formattedString: formattedTime,
+      date: date,
+      moment: this.getMoment(date),
+    };
+    return result;
+  }
+
+  onTrigger(mode: string) {
     let activeLeaf: any = this.app.workspace.activeLeaf;
     let editor = activeLeaf.view.sourceMode.cmEditor;
     var cursor = editor.getCursor();
@@ -206,7 +240,20 @@ export default class NaturalLanguageDates extends Plugin {
     if (!date.moment.isValid()) {
       editor.setCursor({ line: cursor.line, ch: cursor.ch });
     } else {
+      //mode == "replace"
       var newStr = `[[${date.formattedString}]]`;
+
+      if(mode == "link")
+      {
+        newStr = `[selectedText](${date.formattedString})`;
+      }
+      else if(mode == "time")
+      {
+        let time = this.parseTime(selectedText);
+
+        newStr = `${time.formattedString}`;
+      }
+      
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
       editor.focus();
