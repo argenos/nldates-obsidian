@@ -55,9 +55,16 @@ export default class NaturalLanguageDates extends Plugin {
     });
 
     this.addCommand({
-      id: "nlp-date-link",
+      id: "nlp-dates-link",
       name: "Parse natural language date (as link)",
       callback: () => this.onTrigger("link"),
+      hotkeys: [],
+    });
+
+    this.addCommand({
+      id: "nlp-date-clean",
+      name: "Parse natural language date (as plain text)",
+      callback: () => this.onTrigger("clean"),
       hotkeys: [],
     });
 
@@ -246,6 +253,10 @@ export default class NaturalLanguageDates extends Plugin {
       if(mode == "link")
       {
         newStr = `[selectedText](${date.formattedString})`;
+      }
+      else if(mode == "clean")
+      {
+        newStr = `${date.formattedString}`;
       }
       else if(mode == "time")
       {
