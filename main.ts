@@ -314,7 +314,7 @@ class NLDSettingsTab extends PluginSettingTab {
             if (value === "") {
               plugin.settings.timeFormat = "HH:mm";
             } else {
-              plugin.settings.format = value.trim();
+              plugin.settings.timeFormat = value.trim();
             }
             plugin.saveData(plugin.settings);
           })
