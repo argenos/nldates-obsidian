@@ -2,7 +2,6 @@ import {
   App,
   Modal,
   MomentFormatComponent,
-  Notice,
   Plugin,
   PluginSettingTab,
   Setting,
@@ -51,7 +50,10 @@ export default class NaturalLanguageDates extends Plugin {
       id: "nlp-dates",
       name: "Parse natural language date",
       callback: () => this.onTrigger("replace"),
-      hotkeys: [{ modifiers: ["Mod"], key: "y" }],
+      hotkeys: [{
+        modifiers: ["Mod"],
+        key: "y"
+      }],
     });
 
     this.addCommand({
@@ -166,8 +168,7 @@ export default class NaturalLanguageDates extends Plugin {
         forwardDate: true,
       });
     } else {
-      return custom.parseDate(selectedText, new Date(), {
-      });
+      return custom.parseDate(selectedText, new Date(), {});
     }
   }
 
@@ -184,13 +185,22 @@ export default class NaturalLanguageDates extends Plugin {
   getWordBoundaries(editor: any) {
     var cursor = editor.getCursor();
     var line = cursor.line;
-    var word = editor.findWordAt({ line: line, ch: cursor.ch });
+    var word = editor.findWordAt({
+      line: line,
+      ch: cursor.ch
+    });
     var wordStart = word.anchor.ch;
     var wordEnd = word.head.ch;
 
     return {
-      start: { line: line, ch: wordStart },
-      end: { line: line, ch: wordEnd },
+      start: {
+        line: line,
+        ch: wordStart
+      },
+      end: {
+        line: line,
+        ch: wordEnd
+      },
     };
   }
 
@@ -206,12 +216,12 @@ export default class NaturalLanguageDates extends Plugin {
   getFormattedTime(date: Date): string {
     var formattedTime = this.getMoment(date).format(this.settings.timeFormat);
     return formattedTime;
-  }  
+  }
 
   /*
   @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
   @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
-  
+
   */
   parseDate(dateString: string): NLDResult {
     let date = this.getParsedDate(dateString);
@@ -252,26 +262,24 @@ export default class NaturalLanguageDates extends Plugin {
     let date = this.parseDate(selectedText);
 
     if (!date.moment.isValid()) {
-      editor.setCursor({ line: cursor.line, ch: cursor.ch });
+      editor.setCursor({
+        line: cursor.line,
+        ch: cursor.ch
+      });
     } else {
       //mode == "replace"
       var newStr = `[[${date.formattedString}]]`;
 
-      if(mode == "link")
-      {
+      if (mode == "link") {
         newStr = `[selectedText](${date.formattedString})`;
-      }
-      else if(mode == "clean")
-      {
+      } else if (mode == "clean") {
         newStr = `${date.formattedString}`;
-      }
-      else if(mode == "time")
-      {
+      } else if (mode == "time") {
         let time = this.parseTime(selectedText);
 
         newStr = `${time.formattedString}`;
       }
-      
+
       editor.replaceSelection(newStr);
       this.adjustCursor(editor, cursor, newStr, selectedText);
       editor.focus();
@@ -280,7 +288,10 @@ export default class NaturalLanguageDates extends Plugin {
 
   adjustCursor(editor: any, cursor: any, newStr: string, oldStr: string) {
     var cursorOffset = newStr.length - oldStr.length;
-    editor.setCursor({ line: cursor.line, ch: cursor.ch + cursorOffset });
+    editor.setCursor({
+      line: cursor.line,
+      ch: cursor.ch + cursorOffset
+    });
   }
 
   getNowCommand() {
@@ -346,7 +357,9 @@ class NLDSettingsTab extends PluginSettingTab {
 
 
   display(): void {
-    let { containerEl } = this;
+    let {
+      containerEl
+    } = this;
 
     containerEl.empty();
 
@@ -381,7 +394,9 @@ class NLDSettingsTab extends PluginSettingTab {
         })
       );
 
-    containerEl.createEl("h3", { text: "Hotkey formatting settings" });
+    containerEl.createEl("h3", {
+      text: "Hotkey formatting settings"
+    });
 
     new Setting(containerEl)
       .setName("Time format")
@@ -431,8 +446,9 @@ class ParseMomentModal extends Modal {
 
   onOpen() {
     let nldates = this.app.plugins.getPlugin("nldates-obsidian");
-    let { contentEl } = this;
-    const plugin: any = (this as any).plugin;
+    let {
+      contentEl
+    } = this;
 
     contentEl.appendText("Date: ");
 
@@ -482,7 +498,9 @@ class ParseMomentModal extends Modal {
   }
 
   onClose() {
-    let { contentEl } = this;
+    let {
+      contentEl
+    } = this;
     contentEl.empty();
   }
 }
