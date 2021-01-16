@@ -373,9 +373,9 @@ class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Which day to consider as the start of the week")
       .addDropdown((day) =>
         day
-        .setValue(this.plugin.settings.weekStart)
         .addOption("Monday", "Monday")
         .addOption("Sunday", "Sunday")
+        .setValue(this.plugin.settings.weekStart)
         .onChange(async (value) => {
           this.plugin.settings.weekStart = value.trim();
           await this.plugin.saveSettings();
