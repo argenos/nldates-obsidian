@@ -167,7 +167,6 @@ export default class NaturalLanguageDates extends Plugin {
       });
     } else {
       return custom.parseDate(selectedText, new Date(), {
-        forwardDate: true,
       });
     }
   }
