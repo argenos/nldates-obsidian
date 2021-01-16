@@ -99,14 +99,13 @@ export default class NaturalLanguageDates extends Plugin {
     });
 
     this.addCommand({
-      id: "nlp-search",
+      id: "nlp-picker",
       name: "Date picker",
-      // callback: () => this.getDateRange(),
       checkCallback: (checking: boolean) => {
         let leaf = this.app.workspace.activeLeaf;
         if (leaf) {
           if (!checking) {
-            new ParseMomentModal(this.app).open();
+            new ParseMomentModal(this.app, this).open();
           }
           return true;
         }
@@ -435,9 +434,11 @@ class ParseMomentModal extends Modal {
   activeView: MarkdownView;
   activeEditor: CodeMirror.Editor;
   activeCursor: CodeMirror.Position;
+  plugin: NaturalLanguageDates;
 
-  constructor(app: App) {
+  constructor(app: App, plugin: NaturalLanguageDates) {
     super(app);
+    this.plugin = plugin;
     this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!this.activeView) return;
     this.activeEditor = this.activeView.sourceMode.cmEditor;
@@ -445,7 +446,6 @@ class ParseMomentModal extends Modal {
   }
 
   onOpen() {
-    let nldates = this.app.plugins.getPlugin("nldates-obsidian");
     let {
       contentEl
     } = this;
@@ -458,27 +458,27 @@ class ParseMomentModal extends Modal {
 
     let momentFormatField = new MomentFormatComponent(contentEl)
       .setDefaultFormat("YYYY-MM-DD HH:mm")
-      .setValue(nldates.settings.modalMomentFormat)
+      .setValue(this.plugin.settings.modalMomentFormat)
       .onChange((value) => {
-        nldates.settings.modalMomentFormat = value ? value : "YYYY-MM-DD HH:mm";
-        nldates.saveData(nldates.settings);
+        this.plugin.settings.modalMomentFormat = value ? value : "YYYY-MM-DD HH:mm";
+        this.plugin.saveSettings();
       });
 
     contentEl.createEl("br");
 
     contentEl.appendText("Add as link?");
     let toggleLink = new ToggleComponent(contentEl)
-      .setValue(nldates.settings.modalToggleLink)
+      .setValue(this.plugin.settings.modalToggleLink)
       .onChange((value) => {
-        nldates.settings.modalToggleLink = value;
-        nldates.saveData(nldates.settings);
+        this.plugin.settings.modalToggleLink = value;
+        this.plugin.saveSettings();
       });
     contentEl.createEl("br");
 
     let inputButton = new ButtonComponent(contentEl)
       .setButtonText("Insert date")
       .onClick(() => {
-        let parsedDate = nldates.parseDate(inputDateField.getValue());
+        let parsedDate = this.plugin.parseDate(inputDateField.getValue());
         this.parsedDateString = parsedDate.moment.format(
           momentFormatField.getValue()
         );
@@ -487,7 +487,7 @@ class ParseMomentModal extends Modal {
           this.parsedDateString = `[[${this.parsedDateString}]]`;
         this.activeEditor.focus();
         this.activeEditor.setCursor(this.activeCursor);
-        nldates.insertDateString(
+        this.plugin.insertDateString(
           this.parsedDateString,
           this.activeEditor,
           this.activeCursor
