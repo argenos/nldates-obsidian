@@ -45,7 +45,7 @@ export default class NaturalLanguageDates extends Plugin {
 
   async onload() {
     console.log("Loading natural language date parser plugin");
-    this.settings = (await this.loadData()) || new NLDSettings();
+    await this.loadSettings();
 
     this.addCommand({
       id: "nlp-dates",
@@ -118,6 +118,14 @@ export default class NaturalLanguageDates extends Plugin {
 
   onunload() {
     console.log("Unloading natural language date parser plugin");
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings)
   }
 
   getParsedDate(selectedText: string): Date {
@@ -309,20 +317,37 @@ export default class NaturalLanguageDates extends Plugin {
   getDateRange() {}
 }
 
-class NLDSettings {
-  format: string = "YYYY-MM-DD";
-  timeFormat: string = "HH:mm";
-  separator: string = " ";
-  weekStart: string = "Monday";
-  modalToggleTime: boolean = false;
-  modalToggleLink: boolean = false;
-  modalMomentFormat: string = "YYYY-MM-DD HH:mm";
+interface NLDSettings {
+  format: string;
+  timeFormat: string;
+  separator: string;
+  weekStart: string;
+  modalToggleTime: boolean;
+  modalToggleLink: boolean;
+  modalMomentFormat: string;
+}
+
+const DEFAULT_SETTINGS: NLDSettings = {
+  format: "YYYY-MM-DD",
+  timeFormat: "HH:mm",
+  separator: " ",
+  weekStart: "Monday",
+  modalToggleTime: false,
+  modalToggleLink: false,
+  modalMomentFormat: "YYYY-MM-DD HH:mm",
 }
 
 class NLDSettingsTab extends PluginSettingTab {
+  plugin: NaturalLanguageDates;
+
+  constructor(app: App, plugin: NaturalLanguageDates) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
+
+
   display(): void {
     let { containerEl } = this;
-    const plugin: any = (this as any).plugin;
 
     containerEl.empty();
 
@@ -331,16 +356,16 @@ class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Output format for parsed dates")
       .addMomentFormat((text) =>
         text
-          .setDefaultFormat("YYYY-MM-DD")
-          .setValue(plugin.settings.format)
-          .onChange((value) => {
-            if (value === "") {
-              plugin.settings.format = "YYYY-MM-DD";
-            } else {
-              plugin.settings.format = value.trim();
-            }
-            plugin.saveData(plugin.settings);
-          })
+        .setDefaultFormat("YYYY-MM-DD")
+        .setValue(this.plugin.settings.format)
+        .onChange(async (value) => {
+          if (value === "") {
+            this.plugin.settings.format = "YYYY-MM-DD";
+          } else {
+            this.plugin.settings.format = value.trim();
+          }
+          await this.plugin.saveSettings();
+        })
       );
 
     new Setting(containerEl)
@@ -348,15 +373,13 @@ class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Which day to consider as the start of the week")
       .addDropdown((day) =>
         day
-          .setValue(plugin.settings.weekStart)
-          .addOption("Monday", "Monday")
-          .addOption("Sunday", "Sunday")
-          .onChange((value) => {
-            console.log(value);
-            plugin.settings.weekStart = value.trim();
-            console.log(plugin.settings);
-            plugin.saveData(plugin.settings);
-          })
+        .setValue(this.plugin.settings.weekStart)
+        .addOption("Monday", "Monday")
+        .addOption("Sunday", "Sunday")
+        .onChange(async (value) => {
+          this.plugin.settings.weekStart = value.trim();
+          await this.plugin.saveSettings();
+        })
       );
 
     containerEl.createEl("h3", { text: "Hotkey formatting settings" });
@@ -366,16 +389,16 @@ class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Format for the hotkeys that include the current time")
       .addMomentFormat((text) =>
         text
-          .setDefaultFormat("HH:mm")
-          .setValue(plugin.settings.timeFormat)
-          .onChange((value) => {
-            if (value === "") {
-              plugin.settings.timeFormat = "HH:mm";
-            } else {
-              plugin.settings.timeFormat = value.trim();
-            }
-            plugin.saveData(plugin.settings);
-          })
+        .setDefaultFormat("HH:mm")
+        .setValue(this.plugin.settings.timeFormat)
+        .onChange(async (value) => {
+          if (value === "") {
+            this.plugin.settings.timeFormat = "HH:mm";
+          } else {
+            this.plugin.settings.timeFormat = value.trim();
+          }
+          await this.plugin.saveSettings();
+        })
       );
 
     new Setting(containerEl)
@@ -383,12 +406,12 @@ class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Separator between date and time for entries that have both")
       .addText((text) =>
         text
-          .setPlaceholder("Separator is empty")
-          .setValue(plugin.settings.separator)
-          .onChange((value) => {
-            plugin.settings.separator = value;
-            plugin.saveData(plugin.settings);
-          })
+        .setPlaceholder("Separator is empty")
+        .setValue(this.plugin.settings.separator)
+        .onChange(async (value) => {
+          this.plugin.settings.separator = value;
+          await this.plugin.saveSettings();
+        })
       );
   }
 }
