@@ -18,17 +18,38 @@ If a date is not recognized, the link won't be created.
 
 ## Commands and hotkeys
 
-Starting on v0.3.1, in addition to the hotkey to parse the selected date, the following commands are also available:
+Starting on v0.3.2, in addition to the hotkey (default `CTRL/CMD + Y`) to parse the selected date, the following commands are also available:
 
-<img src="https://user-images.githubusercontent.com/5426039/99131199-ccaba580-2612-11eb-8290-95051602c7d3.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
-<br>
-
-You can of course add hotkeys to each of these commands.
-
-### Natural language date picker
-
+#### Natural Language Dates: Date Picker
+Opens the date picker menu
 <br>
 <img src="https://user-images.githubusercontent.com/5426039/99131292-0d0b2380-2613-11eb-8469-20d510fa2074.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
+
+#### Natural Language Dates: Insert current date
+Inserts the current date, using the format specified in the settings menu. (default output `YYYY-MM-DD`)
+
+#### Natural Language Dates: Insert current time
+Inserts the current time, using the format specified in the settings menu. (default output `HH:mm`)
+
+#### Natural Language Dates: Insert current date and time
+Inserts the current date, using the format specified in the settings menu. (default output `YYYY-MM-DD HH:mm`)
+
+#### Natural Language Dates: Parse natural language date
+Parses the selected text as a natural language date. Replaces selected text with an obsidian link to the parsed date in the format specified in the settings menu (default `[[YYYY-MM-DD]]`).
+
+#### Natural Language Dates: Parse natural language time
+Parses the selected text as a natural language time. Replaces selected text with the parsed time stamp in the format specified in the settings menu (default `HH:mm`).
+
+You can try with any of the standard times, i.e. now, in 15min, in 1h, 5min ago, etc.
+
+#### Natural Language Dates: Parse natural language date (as link)
+Parses the selected text as a natural language date. Replaces selected text with a standard markdown link to the parsed date in the format specified in the settings menu (default `[selected text](YYYY-MM-DD)`).
+
+#### Natural Language Dates: Parse natural language date (as plain text)
+Parses the selected text as a natural language date. Replaces selected text with a plain text parsed date in the format specified in the settings menu (default `YYYY-MM-DD`).
+
+
+__You can of course add hotkeys to each of these commands.__
 
 
 ## Demo
