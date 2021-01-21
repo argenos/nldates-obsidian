@@ -270,7 +270,7 @@ export default class NaturalLanguageDates extends Plugin {
       var newStr = `[[${date.formattedString}]]`;
 
       if (mode == "link") {
-        newStr = `[selectedText](${date.formattedString})`;
+        newStr = `[${selectedText}](${date.formattedString})`;
       } else if (mode == "clean") {
         newStr = `${date.formattedString}`;
       } else if (mode == "time") {
