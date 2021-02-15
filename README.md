@@ -16,6 +16,9 @@ The only behaviours I changed were the following:
 
 If a date is not recognized, the link won't be created.
 
+
+**New in v0.4.0**: It's now possible to use the Obsidian URI to open daily notes using natural language by using the nldates action `obsidian://nldates?day=<date here>`
+
 ## Commands and hotkeys
 
 Starting on v0.3.2, in addition to the hotkey (default `CTRL/CMD + Y`) to parse the selected date, the following commands are also available:
