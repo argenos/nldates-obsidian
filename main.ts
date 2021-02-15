@@ -11,6 +11,12 @@ import {
   ToggleComponent,
 } from "obsidian";
 
+import {
+  createDailyNote,
+  getAllDailyNotes,
+  getDailyNote,
+} from "obsidian-daily-notes-interface";
+
 import chrono from "chrono-node";
 
 var getLastDayOfMonth = function (y: any, m: any) {
@@ -115,6 +121,8 @@ export default class NaturalLanguageDates extends Plugin {
     });
 
     this.addSettingTab(new NLDSettingsTab(this.app, this));
+
+    this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
   }
 
   onunload() {
@@ -324,6 +332,37 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   getDateRange() {}
+
+  async actionHandler(params: any) {
+
+    let date = this.parseDate(params.day);
+    console.log(date);
+    const {
+      workspace
+    } = this.app;
+
+    if (date.moment.isValid()) {
+      let dailyNote = await this.getDailyNote(date.moment);
+      const leaf = workspace.splitActiveLeaf();
+      await leaf.openFile(dailyNote);
+
+      workspace.setActiveLeaf(leaf);
+    }
+  }
+
+  getDailyNote(date: any) {
+    // Borrowed from the Slated plugin:
+    // https://github.com/tgrosinger/slated-obsidian/blob/main/src/vault.ts#L17
+    const desiredNote = getDailyNote(date, getAllDailyNotes());
+    if (desiredNote) {
+      console.log("Note exists")
+      return Promise.resolve(desiredNote);
+    } else {
+      console.log("Creating daily note")
+      return Promise.resolve(createDailyNote(date));
+    }
+  }
+
 }
 
 interface NLDSettings {
