@@ -1,7 +1,7 @@
 # Natural language dates in Obsidian
 
 Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
-To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut (default `CTRL + Y`) or the command palette (`Ctrl + P`).
+To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut or the command palette (`Ctrl + P`).
 For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first. It's also possible to use dates like Nov9, 25Dec to use this trick.
 
 You can try with any of the standard dates, i.e. today, tomorrow, in 3 weeks, in 5 months, etc.
@@ -20,7 +20,7 @@ If a date is not recognized, the link won't be created.
 
 ## Commands and hotkeys
 
-Starting on v0.3.2, in addition to the hotkey (default `CTRL/CMD + Y`) to parse the selected date, the following commands are also available:
+Starting on v0.3.2, in addition to the hotkey to parse the selected date, the following commands are also available (note that hotkeys are unset by default starting on v0.4.1):
 
 #### Natural Language Dates: Date Picker
 Opens the date picker menu

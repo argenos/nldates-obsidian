@@ -56,10 +56,7 @@ export default class NaturalLanguageDates extends Plugin {
       id: "nlp-dates",
       name: "Parse natural language date",
       callback: () => this.onTrigger("replace"),
-      hotkeys: [{
-        modifiers: ["Mod"],
-        key: "y"
-      }],
+      hotkeys: [],
     });
 
     this.addCommand({
