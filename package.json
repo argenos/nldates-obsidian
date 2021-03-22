@@ -1,6 +1,6 @@
 {
   "name": "nldates-obsidian",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Plugin to parse natural language dates in Obsidian",
   "main": "main.js",
   "scripts": {
@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "chrono-node": "^2.1.10",
-    "obsidian-daily-notes-interface": "^0.7.2"
+    "obsidian-daily-notes-interface": "^0.7.10"
   }
 }
