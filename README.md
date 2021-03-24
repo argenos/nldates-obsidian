@@ -16,7 +16,14 @@ The only behaviours I changed were the following:
 
 If a date is not recognized, the link won't be created.
 
-**New in v0.4.0**: It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) to open daily notes using natural language by using the nldates action `obsidian://nldates?day=<date here>`. Don't forget to [encode space characters](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI#Encoding) appropriately.
+#### [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) **New in v0.4.0**
+
+It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) to open daily notes using natural language by using the nldates action `obsidian://nldates?day=<date here>`. Don't forget to [encode space characters](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI#Encoding) appropriately.
+
+| `obsidian://nldates` Parameter | Description |
+| ---------                      | ----------- |
+| `day`                          | natural language date string |
+| `newPane`                      | open note in new pane, default is `yes` |
 
 ## Commands and hotkeys
 

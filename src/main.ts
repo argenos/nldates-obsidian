@@ -257,6 +257,10 @@ export default class NaturalLanguageDates extends Plugin {
     return result;
   }
 
+  parseTruthy(flag: string): boolean {
+    return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
+  }
+
   onTrigger(mode: string) {
     let activeLeaf: any = this.app.workspace.activeLeaf;
     let editor = activeLeaf.view.sourceMode.cmEditor;
@@ -333,6 +337,8 @@ export default class NaturalLanguageDates extends Plugin {
   async actionHandler(params: any) {
 
     let date = this.parseDate(params.day);
+    let newPane = this.parseTruthy(params.newPane || "yes");
+
     console.log(date);
     const {
       workspace
@@ -340,7 +346,12 @@ export default class NaturalLanguageDates extends Plugin {
 
     if (date.moment.isValid()) {
       let dailyNote = await this.getDailyNote(date.moment);
-      const leaf = workspace.splitActiveLeaf();
+
+      let leaf = workspace.activeLeaf;
+      if (newPane) {
+        leaf = workspace.splitActiveLeaf();
+      }
+
       await leaf.openFile(dailyNote);
 
       workspace.setActiveLeaf(leaf);
