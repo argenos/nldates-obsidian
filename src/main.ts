@@ -1,14 +1,6 @@
 import {
-  App,
-  Modal,
-  MomentFormatComponent,
   Plugin,
-  PluginSettingTab,
-  Setting,
-  TextComponent,
-  ButtonComponent,
   MarkdownView,
-  ToggleComponent,
 } from "obsidian";
 
 import {
@@ -17,31 +9,9 @@ import {
   getDailyNote,
 } from "obsidian-daily-notes-interface";
 
-import chrono from "chrono-node";
-
-var getLastDayOfMonth = function (y: any, m: any) {
-  return new Date(y, m, 0).getDate();
-};
-
-const custom = chrono.casual.clone();
-
-custom.parsers.push({
-  pattern: () => {
-    return /\bChristmas\b/i;
-  },
-  extract: (context: any, match: RegExpMatchArray) => {
-    return {
-      day: 25,
-      month: 12,
-    };
-  },
-});
-
-interface NLDResult {
-  formattedString: string;
-  date: Date;
-  moment: any;
-}
+import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings"
+import {NLDResult, getParsedDate } from './parser'
+import { ParseMomentModal } from './modals/date-picker'
 
 export default class NaturalLanguageDates extends Plugin {
   settings: NLDSettings;
@@ -134,48 +104,6 @@ export default class NaturalLanguageDates extends Plugin {
     await this.saveData(this.settings)
   }
 
-  getParsedDate(selectedText: string): Date {
-    var nextDateMatch = selectedText.match(/next\s([\w]+)/i);
-    var lastDayOfMatch = selectedText.match(
-      /(last day of|end of)\s*([^\n\r]*)/i
-    );
-    var midOf = selectedText.match(/mid\s([\w]+)/i);
-
-    if (nextDateMatch && nextDateMatch[1] === "week") {
-      return custom.parseDate(`next ${this.settings.weekStart}`, new Date(), {
-        forwardDate: true,
-      });
-    } else if (nextDateMatch && nextDateMatch[1] === "month") {
-      var thisMonth = custom.parseDate("this month", new Date(), {
-        forwardDate: true,
-      });
-      return custom.parseDate(selectedText, thisMonth, {
-        forwardDate: true,
-      });
-    } else if (nextDateMatch && nextDateMatch[1] === "year") {
-      var thisYear = custom.parseDate("this year", new Date(), {
-        forwardDate: true,
-      });
-      return custom.parseDate(selectedText, thisYear, {
-        forwardDate: true,
-      });
-    } else if (lastDayOfMatch) {
-      var tempDate = custom.parse(lastDayOfMatch[2]);
-      var year = tempDate[0].start.get("year"),
-        month = tempDate[0].start.get("month");
-      var lastDay = getLastDayOfMonth(year, month);
-      return custom.parseDate(`${year}-${month}-${lastDay}`, new Date(), {
-        forwardDate: true,
-      });
-    } else if (midOf) {
-      return custom.parseDate(`${midOf[1]} 15th`, new Date(), {
-        forwardDate: true,
-      });
-    } else {
-      return custom.parseDate(selectedText, new Date(), {});
-    }
-  }
-
   getSelectedText(editor: any) {
     if (editor.somethingSelected()) {
       return editor.getSelection();
@@ -228,7 +156,7 @@ export default class NaturalLanguageDates extends Plugin {
 
   */
   parseDate(dateString: string): NLDResult {
-    let date = this.getParsedDate(dateString);
+    let date = getParsedDate(dateString);
     let formattedDate = this.getFormattedDate(date);
     if (formattedDate === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
@@ -243,7 +171,7 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   parseTime(dateString: string): NLDResult {
-    let date = this.getParsedDate(dateString);
+    let date = getParsedDate(dateString);
     let formattedTime = this.getFormattedTime(date);
     if (formattedTime === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
@@ -371,183 +299,4 @@ export default class NaturalLanguageDates extends Plugin {
     }
   }
 
-}
-
-interface NLDSettings {
-  format: string;
-  timeFormat: string;
-  separator: string;
-  weekStart: string;
-  modalToggleTime: boolean;
-  modalToggleLink: boolean;
-  modalMomentFormat: string;
-}
-
-const DEFAULT_SETTINGS: NLDSettings = {
-  format: "YYYY-MM-DD",
-  timeFormat: "HH:mm",
-  separator: " ",
-  weekStart: "Monday",
-  modalToggleTime: false,
-  modalToggleLink: false,
-  modalMomentFormat: "YYYY-MM-DD HH:mm",
-}
-
-class NLDSettingsTab extends PluginSettingTab {
-  plugin: NaturalLanguageDates;
-
-  constructor(app: App, plugin: NaturalLanguageDates) {
-    super(app, plugin);
-    this.plugin = plugin;
-  }
-
-
-  display(): void {
-    let {
-      containerEl
-    } = this;
-
-    containerEl.empty();
-
-    new Setting(containerEl)
-      .setName("Date format")
-      .setDesc("Output format for parsed dates")
-      .addMomentFormat((text) =>
-        text
-        .setDefaultFormat("YYYY-MM-DD")
-        .setValue(this.plugin.settings.format)
-        .onChange(async (value) => {
-          if (value === "") {
-            this.plugin.settings.format = "YYYY-MM-DD";
-          } else {
-            this.plugin.settings.format = value.trim();
-          }
-          await this.plugin.saveSettings();
-        })
-      );
-
-    new Setting(containerEl)
-      .setName("Week starts on")
-      .setDesc("Which day to consider as the start of the week")
-      .addDropdown((day) =>
-        day
-        .addOption("Monday", "Monday")
-        .addOption("Sunday", "Sunday")
-        .setValue(this.plugin.settings.weekStart)
-        .onChange(async (value) => {
-          this.plugin.settings.weekStart = value.trim();
-          await this.plugin.saveSettings();
-        })
-      );
-
-    containerEl.createEl("h3", {
-      text: "Hotkey formatting settings"
-    });
-
-    new Setting(containerEl)
-      .setName("Time format")
-      .setDesc("Format for the hotkeys that include the current time")
-      .addMomentFormat((text) =>
-        text
-        .setDefaultFormat("HH:mm")
-        .setValue(this.plugin.settings.timeFormat)
-        .onChange(async (value) => {
-          if (value === "") {
-            this.plugin.settings.timeFormat = "HH:mm";
-          } else {
-            this.plugin.settings.timeFormat = value.trim();
-          }
-          await this.plugin.saveSettings();
-        })
-      );
-
-    new Setting(containerEl)
-      .setName("Separator")
-      .setDesc("Separator between date and time for entries that have both")
-      .addText((text) =>
-        text
-        .setPlaceholder("Separator is empty")
-        .setValue(this.plugin.settings.separator)
-        .onChange(async (value) => {
-          this.plugin.settings.separator = value;
-          await this.plugin.saveSettings();
-        })
-      );
-  }
-}
-
-class ParseMomentModal extends Modal {
-  parsedDateString = "";
-  activeView: MarkdownView;
-  activeEditor: CodeMirror.Editor;
-  activeCursor: CodeMirror.Position;
-  plugin: NaturalLanguageDates;
-
-  constructor(app: App, plugin: NaturalLanguageDates) {
-    super(app);
-    this.plugin = plugin;
-    this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!this.activeView) return;
-    this.activeEditor = this.activeView.sourceMode.cmEditor;
-    this.activeCursor = this.activeEditor.getCursor();
-  }
-
-  onOpen() {
-    let {
-      contentEl
-    } = this;
-
-    contentEl.appendText("Date: ");
-
-    let inputDateField = new TextComponent(contentEl).setPlaceholder("Date");
-    contentEl.createEl("br");
-    contentEl.appendText("Format: ");
-
-    let momentFormatField = new MomentFormatComponent(contentEl)
-      .setDefaultFormat("YYYY-MM-DD HH:mm")
-      .setValue(this.plugin.settings.modalMomentFormat)
-      .onChange((value) => {
-        this.plugin.settings.modalMomentFormat = value ? value : "YYYY-MM-DD HH:mm";
-        this.plugin.saveSettings();
-      });
-
-    contentEl.createEl("br");
-
-    contentEl.appendText("Add as link?");
-    let toggleLink = new ToggleComponent(contentEl)
-      .setValue(this.plugin.settings.modalToggleLink)
-      .onChange((value) => {
-        this.plugin.settings.modalToggleLink = value;
-        this.plugin.saveSettings();
-      });
-    contentEl.createEl("br");
-
-    let inputButton = new ButtonComponent(contentEl)
-      .setButtonText("Insert date")
-      .onClick(() => {
-        let parsedDate = this.plugin.parseDate(inputDateField.getValue());
-        this.parsedDateString = parsedDate.moment.format(
-          momentFormatField.getValue()
-        );
-        if (!parsedDate.moment.isValid()) this.parsedDateString = "";
-        if (toggleLink.getValue() && this.parsedDateString !== "")
-          this.parsedDateString = `[[${this.parsedDateString}]]`;
-        this.activeEditor.focus();
-        this.activeEditor.setCursor(this.activeCursor);
-        this.plugin.insertDateString(
-          this.parsedDateString,
-          this.activeEditor,
-          this.activeCursor
-        );
-        this.close();
-      });
-    inputDateField.inputEl.focus();
-  }
-
-  onClose() {
-    let {
-      contentEl
-    } = this;
-    contentEl.empty();
-  }
 }
