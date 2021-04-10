@@ -38,6 +38,14 @@ export class NLDSettingsTab extends PluginSettingTab {
 
     containerEl.empty();
 
+    containerEl.createEl("h2", {
+      text: "Nldates settings"
+    });
+
+    containerEl.createEl("h3", {
+      text: "Parser settings"
+    });
+
     new Setting(containerEl)
       .setName("Date format")
       .setDesc("Output format for parsed dates")
