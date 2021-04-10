@@ -26,15 +26,15 @@ export interface NLDResult {
 }
 
 
-export function getParsedDate(selectedText: string): Date {
-    var nextDateMatch = selectedText.match(/next\s([\w]+)/i);
-    var lastDayOfMatch = selectedText.match(
+export function getParsedDate(selectedText: string, weekStart: string): Date {
+    const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
+    const lastDayOfMatch = selectedText.match(
       /(last day of|end of)\s*([^\n\r]*)/i
     );
     var midOf = selectedText.match(/mid\s([\w]+)/i);
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return custom.parseDate(`next ${this.settings.weekStart}`, new Date(), {
+      return custom.parseDate(`next ${weekStart}`, new Date(), {
         forwardDate: true,
       });
     } else if (nextDateMatch && nextDateMatch[1] === "month") {

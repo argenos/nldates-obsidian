@@ -156,7 +156,7 @@ export default class NaturalLanguageDates extends Plugin {
 
   */
   parseDate(dateString: string): NLDResult {
-    let date = getParsedDate(dateString);
+    let date = getParsedDate(dateString, this.settings.weekStart);
     let formattedDate = this.getFormattedDate(date);
     if (formattedDate === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
@@ -171,7 +171,7 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   parseTime(dateString: string): NLDResult {
-    let date = getParsedDate(dateString);
+    let date = getParsedDate(dateString, this.settings.weekStart);
     let formattedTime = this.getFormattedTime(date);
     if (formattedTime === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
