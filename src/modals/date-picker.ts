@@ -4,6 +4,7 @@ import {
   MarkdownView,
   Modal,
   MomentFormatComponent,
+  Scope,
   TextAreaComponent,
   TextComponent,
   ToggleComponent,
@@ -20,10 +21,19 @@ export class ParseMomentModal extends Modal {
   momentFormatField: MomentFormatComponent;
   toggleLink: ToggleComponent;
   dateSample: TextAreaComponent;
+  scope: Scope;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app);
     this.plugin = plugin;
+
+    // Register Enter to close the modal
+    this.scope = new Scope();
+    this.scope.register([], 'Enter', (evt: KeyboardEvent) => {
+      console.log(evt);
+      this.insertDate();
+      return false;
+    });
 
     // Check if we're viewing a markdown file
     this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -132,24 +142,23 @@ export class ParseMomentModal extends Modal {
 
     contentEl.createDiv('modal-button-container', (el) => {
       new ButtonComponent(el).setButtonText('Insert date').onClick(() => {
-        this.getFormattedDate(
-          this.inputDateField.getValue(),
-          this.momentFormatField.getValue(),
-          this.toggleLink.getValue(),
-        );
-
-        this.activeEditor.focus();
-        this.activeEditor.setCursor(this.activeCursor);
-        this.plugin.insertDateString(
-          this.parsedDateString,
-          this.activeEditor,
-          this.activeCursor,
-        );
-        this.close();
+        this.insertDate();
       });
     });
 
     this.inputDateField.inputEl.focus();
+  }
+
+  insertDate() {
+    this.updateSampleDate();
+    this.activeEditor.focus();
+    this.activeEditor.setCursor(this.activeCursor);
+    this.plugin.insertDateString(
+      this.parsedDateString,
+      this.activeEditor,
+      this.activeCursor,
+    );
+    this.close();
   }
 
   updateSampleDate() {
