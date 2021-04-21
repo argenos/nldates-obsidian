@@ -25,10 +25,11 @@ export class ParseMomentModal extends Modal {
     this.contentEl.createEl("form", {}, (formEl) => {
       new Setting(formEl).setName("Date").addText((textEl) => {
         textEl.setPlaceholder("Today");
-        textEl.inputEl.autofocus = true;
         textEl.onChange((value) => {
           dateInput = value;
         });
+
+        window.setTimeout(() => textEl.inputEl.focus(), 10);
       });
       new Setting(formEl).setName("Date Format").addMomentFormat((momentEl) => {
         momentEl.setPlaceholder("YYYY-MM-DD HH:mm");
