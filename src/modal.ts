@@ -18,24 +18,55 @@ export class ParseMomentModal extends Modal {
   }
 
   onOpen() {
+    let previewEl: HTMLElement;
+
     let dateInput = "";
     let momentFormat = this.plugin.settings.modalMomentFormat;
     let insertAsLink = this.plugin.settings.modalToggleLink;
 
-    this.contentEl.createEl("form", {}, (formEl) => {
-      new Setting(formEl).setName("Date").addText((textEl) => {
-        textEl.setPlaceholder("Today");
-        textEl.onChange((value) => {
-          dateInput = value;
-        });
+    const getDateStr = () => {
+      let shouldIncludeAlias = false;
+      if (dateInput.endsWith("|")) {
+        shouldIncludeAlias = true;
+        dateInput = dateInput.slice(0, -1);
+      }
 
-        window.setTimeout(() => textEl.inputEl.focus(), 10);
-      });
+      let parsedDate = this.plugin.parseDate(dateInput || "today");
+      let parsedDateString = parsedDate.moment.isValid()
+        ? parsedDate.moment.format(momentFormat)
+        : "";
+
+      if (insertAsLink) {
+        parsedDateString = shouldIncludeAlias
+          ? `[[${parsedDateString}|${dateInput}]]`
+          : `[[${parsedDateString}]]`;
+      }
+
+      return parsedDateString;
+    };
+
+    this.contentEl.createEl("form", {}, (formEl) => {
+      const dateInputEl = new Setting(formEl)
+        .setName("Date")
+        .setDesc(getDateStr())
+        .addText((textEl) => {
+          textEl.setPlaceholder("Today");
+
+          textEl.onChange((value) => {
+            dateInput = value;
+            previewEl.setText(getDateStr());
+          });
+
+          window.setTimeout(() => textEl.inputEl.focus(), 10);
+        });
+      previewEl = dateInputEl.descEl;
+
       new Setting(formEl).setName("Date Format").addMomentFormat((momentEl) => {
         momentEl.setPlaceholder("YYYY-MM-DD HH:mm");
         momentEl.setValue(momentFormat);
         momentEl.onChange((value) => {
           momentFormat = value.trim() || "YYYY-MM-DD HH:mm";
+          previewEl.setText(getDateStr());
         });
       });
       new Setting(formEl).setName("Add as link?").addToggle((toggleEl) => {
@@ -43,6 +74,7 @@ export class ParseMomentModal extends Modal {
           .setValue(this.plugin.settings.modalToggleLink)
           .onChange((value) => {
             insertAsLink = value;
+            previewEl.setText(getDateStr());
           });
       });
 
@@ -57,22 +89,12 @@ export class ParseMomentModal extends Modal {
         });
       });
 
-      formEl.addEventListener("submit", (e) => {
+      formEl.addEventListener("submit", (e: Event) => {
         e.preventDefault();
-
-        let parsedDate = this.plugin.parseDate(dateInput || "today");
-        let parsedDateString = parsedDate.moment.isValid()
-          ? parsedDate.moment.format(momentFormat)
-          : "";
-
-        if (insertAsLink) {
-          parsedDateString = `[[${parsedDateString}]]`;
-        }
-
         this.activeEditor.focus();
         this.activeEditor.setCursor(this.activeCursor);
         this.plugin.insertDateString(
-          parsedDateString,
+          getDateStr(),
           this.activeEditor,
           this.activeCursor
         );
