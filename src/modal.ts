@@ -25,20 +25,22 @@ export class ParseMomentModal extends Modal {
     let insertAsLink = this.plugin.settings.modalToggleLink;
 
     const getDateStr = () => {
+      let cleanDateInput = dateInput;
       let shouldIncludeAlias = false;
+
       if (dateInput.endsWith("|")) {
         shouldIncludeAlias = true;
-        dateInput = dateInput.slice(0, -1);
+        cleanDateInput = dateInput.slice(0, -1);
       }
 
-      let parsedDate = this.plugin.parseDate(dateInput || "today");
+      let parsedDate = this.plugin.parseDate(cleanDateInput || "today");
       let parsedDateString = parsedDate.moment.isValid()
         ? parsedDate.moment.format(momentFormat)
         : "";
 
       if (insertAsLink) {
         parsedDateString = shouldIncludeAlias
-          ? `[[${parsedDateString}|${dateInput}]]`
+          ? `[[${parsedDateString}|${cleanDateInput}]]`
           : `[[${parsedDateString}]]`;
       }
 
