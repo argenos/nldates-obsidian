@@ -35,7 +35,7 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     }
 
     const relativeDate =
-      inputStr.match(/^in (\d+)/i) || inputStr.match(/^(\d+)/i);
+      inputStr.match(/^in ([+-]?\d+)/i) || inputStr.match(/^([+-]\d+)/i);
     if (relativeDate) {
       const daysAway = relativeDate[1];
       return [
@@ -62,13 +62,17 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   selectSuggestion(suggestion: IDateCompletion): void {
     const head = this.getStartPos();
     const anchor = this.cmEditor.getCursor();
-    this.cmEditor.replaceRange(
-      `[[${this.plugin.parseDate(suggestion.label).formattedString}|${
-        suggestion.label
-      }]]`,
-      head,
-      anchor
-    );
+
+    let replacementStr = "";
+    if (this.plugin.settings.modalToggleLink) {
+      replacementStr = `[[${
+        this.plugin.parseDate(suggestion.label).formattedString
+      }|${suggestion.label}]]`;
+    } else {
+      replacementStr = this.plugin.parseDate(suggestion.label).formattedString;
+    }
+
+    this.cmEditor.replaceRange(replacementStr, head, anchor);
     this.close();
   }
 }
