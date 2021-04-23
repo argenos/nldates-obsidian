@@ -68,6 +68,9 @@ export class ParseMomentModal extends Modal {
         momentEl.setValue(momentFormat);
         momentEl.onChange((value) => {
           momentFormat = value.trim() || "YYYY-MM-DD HH:mm";
+          this.plugin.settings.modalMomentFormat = momentFormat;
+          this.plugin.saveSettings();
+
           previewEl.setText(getDateStr());
         });
       });
@@ -76,6 +79,9 @@ export class ParseMomentModal extends Modal {
           .setValue(this.plugin.settings.modalToggleLink)
           .onChange((value) => {
             insertAsLink = value;
+            this.plugin.settings.modalToggleLink = insertAsLink;
+            this.plugin.saveSettings();
+
             previewEl.setText(getDateStr());
           });
       });
