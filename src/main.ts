@@ -7,10 +7,12 @@ import {
 } from "obsidian-daily-notes-interface";
 
 import DatePickerModal from "./modals/date-picker";
-import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
 import { NLDResult, getParsedDate } from "./parser";
+import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
+import DateSuggest from "./suggest/date-suggest";
 
 export default class NaturalLanguageDates extends Plugin {
+  autosuggest: DateSuggest;
   settings: NLDSettings;
 
   async onload() {
@@ -84,6 +86,16 @@ export default class NaturalLanguageDates extends Plugin {
       "nldates",
       this.actionHandler.bind(this)
     );
+
+    this.autosuggest = new DateSuggest(this.app, this);
+    this.registerCodeMirror((cm: CodeMirror.Editor) => {
+      cm.on(
+        "change",
+        (cmEditor: CodeMirror.Editor, changeObj: CodeMirror.EditorChange) => {
+          return this.autosuggest.update(cmEditor, changeObj);
+        }
+      );
+    });
   }
 
   onunload() {
