@@ -40,12 +40,14 @@ export default class Suggest<T> {
       }
     });
 
-    scope.register([], "Enter", (event) => {
+    const selectItem = (event: KeyboardEvent) => {
       if (!event.isComposing) {
         this.useSelectedItem(event);
         return false;
       }
-    });
+    };
+    scope.register([], "Enter", selectItem);
+    scope.register(["Shift"], "Enter", selectItem);
   }
 
   onSuggestionClick(event: MouseEvent, el: HTMLDivElement): void {

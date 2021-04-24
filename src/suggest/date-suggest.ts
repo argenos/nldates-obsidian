@@ -13,6 +13,35 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app, TRIGGER_CHAR);
     this.plugin = plugin;
+
+    this.updateInstructions();
+  }
+
+  open(): void {
+    super.open();
+    // update the instructions since they are settings-dependent
+    this.updateInstructions();
+  }
+
+  protected updateInstructions() {
+    if (!this.plugin.settings.modalToggleLink) {
+      // Instructions only apply for links
+      return;
+    }
+
+    this.setInstructions((containerEl) => {
+      containerEl.createDiv("prompt-instructions", (instructions) => {
+        instructions.createDiv("prompt-instruction", (instruction) => {
+          instruction.createSpan({
+            cls: "prompt-instruction-command",
+            text: "Shift",
+          });
+          instruction.createSpan({
+            text: "Keep text as alias",
+          });
+        });
+      });
+    });
   }
 
   getSuggestions(inputStr: string): IDateCompletion[] {
@@ -59,20 +88,25 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     el.setText(suggestion.label);
   }
 
-  selectSuggestion(suggestion: IDateCompletion): void {
+  selectSuggestion(
+    suggestion: IDateCompletion,
+    event: KeyboardEvent | MouseEvent
+  ): void {
+    const includeAlias = event.shiftKey;
+
     const head = this.getStartPos();
     const anchor = this.cmEditor.getCursor();
 
-    let replacementStr = "";
+    let dateStr = this.plugin.parseDate(suggestion.label).formattedString;
     if (this.plugin.settings.modalToggleLink) {
-      replacementStr = `[[${
-        this.plugin.parseDate(suggestion.label).formattedString
-      }|${suggestion.label}]]`;
-    } else {
-      replacementStr = this.plugin.parseDate(suggestion.label).formattedString;
+      if (includeAlias) {
+        dateStr = `[[${dateStr}|${suggestion.label}]]`;
+      } else {
+        dateStr = `[[${dateStr}]]`;
+      }
     }
 
-    this.cmEditor.replaceRange(replacementStr, head, anchor);
+    this.cmEditor.replaceRange(dateStr, head, anchor);
     this.close();
   }
 }

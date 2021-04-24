@@ -8,6 +8,7 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
   private scope: Scope;
 
   private suggestEl: HTMLElement;
+  private instructionsEl: HTMLElement;
   private suggest: Suggest<T>;
 
   private startPos: CodeMirror.Position;
@@ -20,9 +21,17 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
 
     this.suggestEl = createDiv("suggestion-container");
     const suggestion = this.suggestEl.createDiv("suggestion");
+    this.instructionsEl = this.suggestEl.createDiv("prompt-instructions");
     this.suggest = new Suggest(this, suggestion, this.scope);
 
     this.scope.register([], "Escape", this.close.bind(this));
+  }
+
+  public setInstructions(
+    createInstructionsFn: (containerEl: HTMLElement) => void
+  ): void {
+    this.instructionsEl.empty();
+    createInstructionsFn(this.instructionsEl);
   }
 
   public update(
@@ -90,5 +99,5 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
 
   abstract getSuggestions(inputStr: string): T[];
   abstract renderSuggestion(item: T, el: HTMLElement): void;
-  abstract selectSuggestion(item: T): void;
+  abstract selectSuggestion(item: T, evt: MouseEvent | KeyboardEvent): void;
 }
