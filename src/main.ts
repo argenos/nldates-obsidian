@@ -6,9 +6,9 @@ import {
   getDailyNote,
 } from "obsidian-daily-notes-interface";
 
+import DatePickerModal from "./modals/date-picker";
 import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
 import { NLDResult, getParsedDate } from "./parser";
-import { ParseMomentModal } from "./modals/date-picker";
 
 export default class NaturalLanguageDates extends Plugin {
   settings: NLDSettings;
@@ -70,14 +70,10 @@ export default class NaturalLanguageDates extends Plugin {
       id: "nlp-picker",
       name: "Date picker",
       checkCallback: (checking: boolean) => {
-        let leaf = this.app.workspace.activeLeaf;
-        if (leaf) {
-          if (!checking) {
-            new ParseMomentModal(this.app, this).open();
-          }
-          return true;
+        if (checking) {
+          return !!this.app.workspace.activeLeaf;
         }
-        return false;
+        new DatePickerModal(this.app, this).open();
       },
       hotkeys: [],
     });
