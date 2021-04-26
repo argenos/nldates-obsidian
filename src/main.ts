@@ -87,12 +87,17 @@ export default class NaturalLanguageDates extends Plugin {
       this.actionHandler.bind(this)
     );
 
-    this.autosuggest = new DateSuggest(this.app, this);
+    if (this.settings.isAutosuggestEnabled) {
+      this.autosuggest = new DateSuggest(this.app, this);
+    }
+
     this.registerCodeMirror((cm: CodeMirror.Editor) => {
       cm.on(
         "change",
         (cmEditor: CodeMirror.Editor, changeObj: CodeMirror.EditorChange) => {
-          return this.autosuggest.update(cmEditor, changeObj);
+          return (
+            this.autosuggest && this.autosuggest.update(cmEditor, changeObj)
+          );
         }
       );
     });
@@ -108,7 +113,11 @@ export default class NaturalLanguageDates extends Plugin {
 
   async saveSettings() {
     // rebuild autosuggest in case trigger phrase changed
-    this.autosuggest = new DateSuggest(this.app, this);
+    if (this.settings.isAutosuggestEnabled) {
+      this.autosuggest = new DateSuggest(this.app, this);
+    } else {
+      this.autosuggest = null;
+    }
 
     await this.saveData(this.settings);
   }

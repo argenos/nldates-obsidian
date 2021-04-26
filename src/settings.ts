@@ -3,10 +3,13 @@ import NaturalLanguageDates from "./main";
 
 export interface NLDSettings {
   autocompleteTriggerPhrase: string;
+  isAutosuggestEnabled: boolean;
+
   format: string;
   timeFormat: string;
   separator: string;
   weekStart: string;
+
   modalToggleTime: boolean;
   modalToggleLink: boolean;
   modalMomentFormat: string;
@@ -14,10 +17,13 @@ export interface NLDSettings {
 
 export const DEFAULT_SETTINGS: NLDSettings = {
   autocompleteTriggerPhrase: "@",
+  isAutosuggestEnabled: true,
+
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
   separator: " ",
   weekStart: "Monday",
+
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
@@ -114,11 +120,25 @@ export class NLDSettingsTab extends PluginSettingTab {
     });
 
     new Setting(containerEl)
+      .setName("Enable date autosuggest")
+      .setDesc(
+        `Input dates with natural language. Open the suggest menu with ${this.plugin.settings.autocompleteTriggerPhrase}`
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.isAutosuggestEnabled)
+          .onChange(async (value) => {
+            this.plugin.settings.isAutosuggestEnabled = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Trigger phrase")
       .setDesc("Character(s) that will cause the date autosuggest to open")
       .addMomentFormat((text) =>
         text
-          .setDefaultFormat(DEFAULT_SETTINGS.autocompleteTriggerPhrase)
+          .setPlaceholder(DEFAULT_SETTINGS.autocompleteTriggerPhrase)
           .setValue(this.plugin.settings.autocompleteTriggerPhrase || "@")
           .onChange(async (value) => {
             this.plugin.settings.autocompleteTriggerPhrase = value.trim();
