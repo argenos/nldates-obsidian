@@ -45,6 +45,16 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   }
 
   getSuggestions(inputStr: string): IDateCompletion[] {
+    // handle no matches
+    const suggestions = this.getDateSuggestions(inputStr);
+    if (suggestions.length) {
+      return suggestions;
+    } else {
+      return [{ label: inputStr }];
+    }
+  }
+
+  getDateSuggestions(inputStr: string): IDateCompletion[] {
     if (inputStr.match(/(next|last|this)/i)) {
       const reference = inputStr.match(/(next|last|this)/i)[1];
       return [
