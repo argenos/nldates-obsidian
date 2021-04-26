@@ -63,17 +63,20 @@ export class ParseMomentModal extends Modal {
         });
       previewEl = dateInputEl.descEl;
 
-      new Setting(formEl).setName("Date Format").addMomentFormat((momentEl) => {
-        momentEl.setPlaceholder("YYYY-MM-DD HH:mm");
-        momentEl.setValue(momentFormat);
-        momentEl.onChange((value) => {
-          momentFormat = value.trim() || "YYYY-MM-DD HH:mm";
-          this.plugin.settings.modalMomentFormat = momentFormat;
-          this.plugin.saveSettings();
+      new Setting(formEl)
+        .setName("Date Format")
+        .setDesc("Moment format to be used")
+        .addMomentFormat((momentEl) => {
+          momentEl.setPlaceholder("YYYY-MM-DD HH:mm");
+          momentEl.setValue(momentFormat);
+          momentEl.onChange((value) => {
+            momentFormat = value.trim() || "YYYY-MM-DD HH:mm";
+            this.plugin.settings.modalMomentFormat = momentFormat;
+            this.plugin.saveSettings();
 
-          previewEl.setText(getDateStr());
+            previewEl.setText(getDateStr());
+          });
         });
-      });
       new Setting(formEl).setName("Add as link?").addToggle((toggleEl) => {
         toggleEl
           .setValue(this.plugin.settings.modalToggleLink)
@@ -99,14 +102,12 @@ export class ParseMomentModal extends Modal {
 
       formEl.addEventListener("submit", (e: Event) => {
         e.preventDefault();
-        this.activeEditor.focus();
-        this.activeEditor.setCursor(this.activeCursor);
+        this.close();
         this.plugin.insertDateString(
           getDateStr(),
           this.activeEditor,
           this.activeCursor
         );
-        this.close();
       });
     });
   }
