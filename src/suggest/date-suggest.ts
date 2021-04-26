@@ -2,8 +2,6 @@ import { App } from "obsidian";
 import type NaturalLanguageDates from "src/main";
 import CodeMirrorSuggest from "./codemirror-suggest";
 
-const TRIGGER_CHAR = "@";
-
 interface IDateCompletion {
   label: string;
 }
@@ -11,7 +9,7 @@ interface IDateCompletion {
 export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   plugin: NaturalLanguageDates;
   constructor(app: App, plugin: NaturalLanguageDates) {
-    super(app, TRIGGER_CHAR);
+    super(app, plugin.settings.autocompleteTriggerPhrase);
     this.plugin = plugin;
 
     this.updateInstructions();

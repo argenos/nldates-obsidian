@@ -2,6 +2,29 @@ import { App, ISuggestOwner, Scope } from "obsidian";
 
 import Suggest from "./suggest";
 
+function checkForInputPhrase(
+  cmEditor: CodeMirror.Editor,
+  pos: CodeMirror.Position,
+  phrase: string
+): boolean {
+  const from = {
+    line: pos.line,
+    ch: pos.ch - phrase.length,
+  };
+  console.log(cmEditor.getRange(from, pos));
+  return cmEditor.getRange(from, pos) === phrase;
+}
+
+function isCursorBeforePos(
+  pos: CodeMirror.Position,
+  cursor: CodeMirror.Position
+): boolean {
+  if (pos.line === cursor.line) {
+    return cursor.ch < pos.ch;
+  }
+  return cursor.line < pos.line;
+}
+
 export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
   protected app: App;
   protected cmEditor: CodeMirror.Editor;
@@ -12,10 +35,10 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
   private suggest: Suggest<T>;
 
   private startPos: CodeMirror.Position;
-  private triggerChar: string;
+  private triggerPhrase: string;
 
-  constructor(app: App, triggerChar: string) {
-    this.triggerChar = triggerChar;
+  constructor(app: App, triggerPhrase: string) {
+    this.triggerPhrase = triggerPhrase;
     this.app = app;
     this.scope = new Scope();
 
@@ -42,21 +65,22 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
       this.suggestEl?.detach();
     }
     this.cmEditor = cmEditor;
+    const cursorPos = cmEditor.getCursor();
 
     // autosuggest is open
     if (this.suggestEl.parentNode) {
-      if (changeObj.removed.contains(this.triggerChar)) {
+      if (isCursorBeforePos(this.startPos, cursorPos)) {
         this.close();
         return false;
       }
-
       this.attachAtCursor();
     } else {
       if (
-        changeObj.text.length === 1 &&
-        changeObj.text[0] === this.triggerChar
+        changeObj.text.length === 1 && // ignore multi-cursors
+        checkForInputPhrase(this.cmEditor, cursorPos, this.triggerPhrase) &&
+        !document.querySelector(".suggestion-container") // don't trigger multiple autosuggests
       ) {
-        this.startPos = changeObj.from;
+        this.startPos = cursorPos;
         this.open();
         this.attachAtCursor();
       }
@@ -66,14 +90,17 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
   }
 
   protected getStartPos(): CodeMirror.Position {
-    return this.startPos;
+    return {
+      line: this.startPos.line,
+      ch: this.startPos.ch - this.triggerPhrase.length,
+    };
   }
 
   protected getInputStr(): string {
     // return string from / to cursor
     const cursor = this.cmEditor.getCursor();
     const line = this.cmEditor.getLine(cursor.line);
-    return line.substring(this.startPos.ch + 1, cursor.ch);
+    return line.substring(this.startPos.ch, cursor.ch);
   }
 
   private attachAtCursor() {
@@ -92,7 +119,7 @@ export default abstract class CodeMirrorSuggest<T> implements ISuggestOwner<T> {
   close(): void {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (<any>this.app).keymap.popScope(this.scope);
-
+    this.startPos = null;
     this.suggest.setSuggestions([]);
     this.suggestEl.detach();
   }

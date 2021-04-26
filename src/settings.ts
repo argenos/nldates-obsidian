@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import NaturalLanguageDates from "./main";
 
 export interface NLDSettings {
+  autocompleteTriggerPhrase: string;
   format: string;
   timeFormat: string;
   separator: string;
@@ -12,6 +13,7 @@ export interface NLDSettings {
 }
 
 export const DEFAULT_SETTINGS: NLDSettings = {
+  autocompleteTriggerPhrase: "@",
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
   separator: " ",
@@ -103,6 +105,23 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.separator)
           .onChange(async (value) => {
             this.plugin.settings.separator = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    containerEl.createEl("h3", {
+      text: "Date Autosuggest",
+    });
+
+    new Setting(containerEl)
+      .setName("Trigger phrase")
+      .setDesc("Character(s) that will cause the date autosuggest to open")
+      .addMomentFormat((text) =>
+        text
+          .setDefaultFormat(DEFAULT_SETTINGS.autocompleteTriggerPhrase)
+          .setValue(this.plugin.settings.autocompleteTriggerPhrase || "@")
+          .onChange(async (value) => {
+            this.plugin.settings.autocompleteTriggerPhrase = value.trim();
             await this.plugin.saveSettings();
           })
       );

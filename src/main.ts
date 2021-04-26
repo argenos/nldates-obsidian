@@ -107,6 +107,9 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   async saveSettings() {
+    // rebuild autosuggest in case trigger phrase changed
+    this.autosuggest = new DateSuggest(this.app, this);
+
     await this.saveData(this.settings);
   }
 
