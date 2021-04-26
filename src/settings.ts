@@ -19,8 +19,7 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
-}
-
+};
 
 export class NLDSettingsTab extends PluginSettingTab {
   plugin: NaturalLanguageDates;
@@ -30,20 +29,17 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-
   display(): void {
-    let {
-      containerEl
-    } = this;
+    let { containerEl } = this;
 
     containerEl.empty();
 
     containerEl.createEl("h2", {
-      text: "Nldates settings"
+      text: "Nldates settings",
     });
 
     containerEl.createEl("h3", {
-      text: "Parser settings"
+      text: "Parser settings",
     });
 
     new Setting(containerEl)
@@ -51,16 +47,16 @@ export class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Output format for parsed dates")
       .addMomentFormat((text) =>
         text
-        .setDefaultFormat("YYYY-MM-DD")
-        .setValue(this.plugin.settings.format)
-        .onChange(async (value) => {
-          if (value === "") {
-            this.plugin.settings.format = "YYYY-MM-DD";
-          } else {
-            this.plugin.settings.format = value.trim();
-          }
-          await this.plugin.saveSettings();
-        })
+          .setDefaultFormat("YYYY-MM-DD")
+          .setValue(this.plugin.settings.format)
+          .onChange(async (value) => {
+            if (value === "") {
+              this.plugin.settings.format = "YYYY-MM-DD";
+            } else {
+              this.plugin.settings.format = value.trim();
+            }
+            await this.plugin.saveSettings();
+          })
       );
 
     new Setting(containerEl)
@@ -68,17 +64,17 @@ export class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Which day to consider as the start of the week")
       .addDropdown((day) =>
         day
-        .addOption("Monday", "Monday")
-        .addOption("Sunday", "Sunday")
-        .setValue(this.plugin.settings.weekStart)
-        .onChange(async (value) => {
-          this.plugin.settings.weekStart = value.trim();
-          await this.plugin.saveSettings();
-        })
+          .addOption("Monday", "Monday")
+          .addOption("Sunday", "Sunday")
+          .setValue(this.plugin.settings.weekStart)
+          .onChange(async (value) => {
+            this.plugin.settings.weekStart = value.trim();
+            await this.plugin.saveSettings();
+          })
       );
 
     containerEl.createEl("h3", {
-      text: "Hotkey formatting settings"
+      text: "Hotkey formatting settings",
     });
 
     new Setting(containerEl)
@@ -86,16 +82,16 @@ export class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Format for the hotkeys that include the current time")
       .addMomentFormat((text) =>
         text
-        .setDefaultFormat("HH:mm")
-        .setValue(this.plugin.settings.timeFormat)
-        .onChange(async (value) => {
-          if (value === "") {
-            this.plugin.settings.timeFormat = "HH:mm";
-          } else {
-            this.plugin.settings.timeFormat = value.trim();
-          }
-          await this.plugin.saveSettings();
-        })
+          .setDefaultFormat("HH:mm")
+          .setValue(this.plugin.settings.timeFormat)
+          .onChange(async (value) => {
+            if (value === "") {
+              this.plugin.settings.timeFormat = "HH:mm";
+            } else {
+              this.plugin.settings.timeFormat = value.trim();
+            }
+            await this.plugin.saveSettings();
+          })
       );
 
     new Setting(containerEl)
@@ -103,12 +99,12 @@ export class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Separator between date and time for entries that have both")
       .addText((text) =>
         text
-        .setPlaceholder("Separator is empty")
-        .setValue(this.plugin.settings.separator)
-        .onChange(async (value) => {
-          this.plugin.settings.separator = value;
-          await this.plugin.saveSettings();
-        })
+          .setPlaceholder("Separator is empty")
+          .setValue(this.plugin.settings.separator)
+          .onChange(async (value) => {
+            this.plugin.settings.separator = value;
+            await this.plugin.saveSettings();
+          })
       );
   }
 }

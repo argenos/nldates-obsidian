@@ -1,7 +1,4 @@
-import {
-  Plugin,
-  MarkdownView,
-} from "obsidian";
+import { Plugin } from "obsidian";
 
 import {
   createDailyNote,
@@ -9,14 +6,12 @@ import {
   getDailyNote,
 } from "obsidian-daily-notes-interface";
 
-import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings"
-import {NLDResult, getParsedDate } from './parser'
-import { ParseMomentModal } from './modals/date-picker'
+import DatePickerModal from "./modals/date-picker";
+import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
+import { NLDResult, getParsedDate } from "./parser";
 
 export default class NaturalLanguageDates extends Plugin {
   settings: NLDSettings;
-
-  onInit() {}
 
   async onload() {
     console.log("Loading natural language date parser plugin");
@@ -75,21 +70,20 @@ export default class NaturalLanguageDates extends Plugin {
       id: "nlp-picker",
       name: "Date picker",
       checkCallback: (checking: boolean) => {
-        let leaf = this.app.workspace.activeLeaf;
-        if (leaf) {
-          if (!checking) {
-            new ParseMomentModal(this.app, this).open();
-          }
-          return true;
+        if (checking) {
+          return !!this.app.workspace.activeLeaf;
         }
-        return false;
+        new DatePickerModal(this.app, this).open();
       },
       hotkeys: [],
     });
 
     this.addSettingTab(new NLDSettingsTab(this.app, this));
 
-    this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
+    this.registerObsidianProtocolHandler(
+      "nldates",
+      this.actionHandler.bind(this)
+    );
   }
 
   onunload() {
@@ -101,7 +95,7 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   async saveSettings() {
-    await this.saveData(this.settings)
+    await this.saveData(this.settings);
   }
 
   getSelectedText(editor: any) {
@@ -119,7 +113,7 @@ export default class NaturalLanguageDates extends Plugin {
     var line = cursor.line;
     var word = editor.findWordAt({
       line: line,
-      ch: cursor.ch
+      ch: cursor.ch,
     });
     var wordStart = word.anchor.ch;
     var wordEnd = word.head.ch;
@@ -127,11 +121,11 @@ export default class NaturalLanguageDates extends Plugin {
     return {
       start: {
         line: line,
-        ch: wordStart
+        ch: wordStart,
       },
       end: {
         line: line,
-        ch: wordEnd
+        ch: wordEnd,
       },
     };
   }
@@ -200,7 +194,7 @@ export default class NaturalLanguageDates extends Plugin {
     if (!date.moment.isValid()) {
       editor.setCursor({
         line: cursor.line,
-        ch: cursor.ch
+        ch: cursor.ch,
       });
     } else {
       //mode == "replace"
@@ -226,7 +220,7 @@ export default class NaturalLanguageDates extends Plugin {
     var cursorOffset = newStr.length - oldStr.length;
     editor.setCursor({
       line: cursor.line,
-      ch: cursor.ch + cursorOffset
+      ch: cursor.ch + cursorOffset,
     });
   }
 
@@ -263,14 +257,11 @@ export default class NaturalLanguageDates extends Plugin {
   getDateRange() {}
 
   async actionHandler(params: any) {
-
     let date = this.parseDate(params.day);
     let newPane = this.parseTruthy(params.newPane || "yes");
 
     console.log(date);
-    const {
-      workspace
-    } = this.app;
+    const { workspace } = this.app;
 
     if (date.moment.isValid()) {
       let dailyNote = await this.getDailyNote(date.moment);
@@ -291,12 +282,11 @@ export default class NaturalLanguageDates extends Plugin {
     // https://github.com/tgrosinger/slated-obsidian/blob/main/src/vault.ts#L17
     const desiredNote = getDailyNote(date, getAllDailyNotes());
     if (desiredNote) {
-      console.log("Note exists")
+      console.log("Note exists");
       return Promise.resolve(desiredNote);
     } else {
-      console.log("Creating daily note")
+      console.log("Creating daily note");
       return Promise.resolve(createDailyNote(date));
     }
   }
-
 }
