@@ -11,7 +11,6 @@ function checkForInputPhrase(
     line: pos.line,
     ch: pos.ch - phrase.length,
   };
-  console.log(cmEditor.getRange(from, pos));
   return cmEditor.getRange(from, pos) === phrase;
 }
 
