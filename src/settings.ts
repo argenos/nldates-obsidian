@@ -60,11 +60,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setDefaultFormat("YYYY-MM-DD")
           .setValue(this.plugin.settings.format)
           .onChange(async (value) => {
-            if (value === "") {
-              this.plugin.settings.format = "YYYY-MM-DD";
-            } else {
-              this.plugin.settings.format = value.trim();
-            }
+            this.plugin.settings.format = value || "YYYY-MM-DD";
             await this.plugin.saveSettings();
           })
       );
@@ -78,7 +74,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .addOption("Sunday", "Sunday")
           .setValue(this.plugin.settings.weekStart)
           .onChange(async (value) => {
-            this.plugin.settings.weekStart = value.trim();
+            this.plugin.settings.weekStart = value;
             await this.plugin.saveSettings();
           })
       );
@@ -95,11 +91,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setDefaultFormat("HH:mm")
           .setValue(this.plugin.settings.timeFormat)
           .onChange(async (value) => {
-            if (value === "") {
-              this.plugin.settings.timeFormat = "HH:mm";
-            } else {
-              this.plugin.settings.timeFormat = value.trim();
-            }
+            this.plugin.settings.timeFormat = value || "HH:mm";
             await this.plugin.saveSettings();
           })
       );
