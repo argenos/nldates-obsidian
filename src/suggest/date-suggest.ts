@@ -22,7 +22,7 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   }
 
   protected updateInstructions() {
-    if (!this.plugin.settings.modalToggleLink) {
+    if (!this.plugin.settings.autosuggestToggleLink) {
       // Instructions only apply for links
       return;
     }
@@ -72,16 +72,18 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     }
 
     const relativeDate =
-      inputStr.match(/^in ([+-]?\d+)/i) || inputStr.match(/^([+-]\d+)/i);
+      inputStr.match(/^in ([+-]?\d+)/i) || inputStr.match(/^([+-]?\d+)/i);
     if (relativeDate) {
-      const daysAway = relativeDate[1];
+      const timeDelta = relativeDate[1];
       return [
-        { label: `in ${daysAway} days` },
-        { label: `in ${daysAway} weeks` },
-        { label: `in ${daysAway} months` },
-        { label: `${daysAway} days ago` },
-        { label: `${daysAway} weeks ago` },
-        { label: `${daysAway} months ago` },
+        { label: `in ${timeDelta} minutes` },
+        { label: `in ${timeDelta} hours` },
+        { label: `in ${timeDelta} days` },
+        { label: `in ${timeDelta} weeks` },
+        { label: `in ${timeDelta} months` },
+        { label: `${timeDelta} days ago` },
+        { label: `${timeDelta} weeks ago` },
+        { label: `${timeDelta} months ago` },
       ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
     }
 
@@ -106,7 +108,8 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     const anchor = this.cmEditor.getCursor();
 
     let dateStr = this.plugin.parseDate(suggestion.label).formattedString;
-    if (this.plugin.settings.modalToggleLink) {
+    console.log("dateStr", dateStr, suggestion.label);
+    if (this.plugin.settings.autosuggestToggleLink) {
       if (includeAlias) {
         dateStr = `[[${dateStr}|${suggestion.label}]]`;
       } else {

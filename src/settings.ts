@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import NaturalLanguageDates from "./main";
 
 export interface NLDSettings {
+  autosuggestToggleLink: boolean;
   autocompleteTriggerPhrase: string;
   isAutosuggestEnabled: boolean;
 
@@ -16,6 +17,7 @@ export interface NLDSettings {
 }
 
 export const DEFAULT_SETTINGS: NLDSettings = {
+  autosuggestToggleLink: true,
   autocompleteTriggerPhrase: "@",
   isAutosuggestEnabled: true,
 
@@ -129,6 +131,20 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.isAutosuggestEnabled)
           .onChange(async (value) => {
             this.plugin.settings.isAutosuggestEnabled = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Add dates as link?")
+      .setDesc(
+        "If enabled, dates created via autosuggest will be wrapped in [[wikilinks]]"
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.autosuggestToggleLink)
+          .onChange(async (value) => {
+            this.plugin.settings.autosuggestToggleLink = value;
             await this.plugin.saveSettings();
           })
       );
