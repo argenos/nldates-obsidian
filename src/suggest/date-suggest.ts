@@ -21,7 +21,7 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     this.updateInstructions();
   }
 
-  protected updateInstructions() {
+  protected updateInstructions(): void {
     if (!this.plugin.settings.autosuggestToggleLink) {
       // Instructions only apply for links
       return;
@@ -108,7 +108,6 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     const anchor = this.cmEditor.getCursor();
 
     let dateStr = this.plugin.parseDate(suggestion.label).formattedString;
-    console.log("dateStr", dateStr, suggestion.label);
     if (this.plugin.settings.autosuggestToggleLink) {
       if (includeAlias) {
         dateStr = `[[${dateStr}|${suggestion.label}]]`;

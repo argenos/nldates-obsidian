@@ -17,7 +17,7 @@ export default class DatePickerModal extends Modal {
     }
   }
 
-  onOpen() {
+  onOpen(): void {
     let previewEl: HTMLElement;
 
     let dateInput = "";
@@ -33,7 +33,7 @@ export default class DatePickerModal extends Modal {
         cleanDateInput = dateInput.slice(0, -1);
       }
 
-      let parsedDate = this.plugin.parseDate(cleanDateInput || "today");
+      const parsedDate = this.plugin.parseDate(cleanDateInput || "today");
       let parsedDateString = parsedDate.moment.isValid()
         ? parsedDate.moment.format(momentFormat)
         : "";

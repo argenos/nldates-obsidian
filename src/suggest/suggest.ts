@@ -63,7 +63,7 @@ export default class Suggest<T> {
     this.setSelectedItem(item, false);
   }
 
-  setSuggestions(values: T[]) {
+  setSuggestions(values: T[]): void {
     this.containerEl.empty();
     const suggestionEls: HTMLDivElement[] = [];
 
@@ -78,14 +78,14 @@ export default class Suggest<T> {
     this.setSelectedItem(0, false);
   }
 
-  useSelectedItem(event: MouseEvent | KeyboardEvent) {
+  useSelectedItem(event: MouseEvent | KeyboardEvent): void {
     const currentValue = this.values[this.selectedItem];
     if (currentValue) {
       this.owner.selectSuggestion(currentValue, event);
     }
   }
 
-  setSelectedItem(selectedIndex: number, scrollIntoView: boolean) {
+  setSelectedItem(selectedIndex: number, scrollIntoView: boolean): void {
     const normalizedIndex = wrapAround(selectedIndex, this.suggestions.length);
     const prevSelectedSuggestion = this.suggestions[this.selectedItem];
     const selectedSuggestion = this.suggestions[normalizedIndex];
