@@ -37,7 +37,8 @@ It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Adv
 
 ### Commands and Hotkeys
 
-Starting on v0.3.2, in addition to the hotkey to parse the selected date, the following commands are also available (note that hotkeys are unset by default starting on v0.4.1):
+`nldates` adds a few commands to work with dates in natural language. You can add custom hotkeys for them by going to `Settings > Hotkeys` and filtering by `Natural Language Dates` (Note that hotkeys are unset by default starting on **v0.4.1**).
+
 
 #### Natural Language Dates: Date Picker
 
