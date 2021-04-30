@@ -39,7 +39,8 @@ It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Adv
 
 Starting on v0.3.2, in addition to the hotkey to parse the selected date, the following commands are also available (note that hotkeys are unset by default starting on v0.4.1):
 
-### Natural Language Dates: Date Picker
+#### Natural Language Dates: Date Picker
+
 
 <img src="assets/date-picker.png" alt="date-picker" width="400" />
 
