@@ -8,21 +8,11 @@ Insert timestamps and cross-link your daily notes with the flexibility of natura
 - [Custom `nldates` Obsidian URI](#nldates-uri-action)
 - [Date Picker](#natural-language-dates-date-picker)
 
-You can try with any of the standard dates, i.e. today, tomorrow, in 3 weeks, in 5 months, etc.
-The only behaviours I changed were the following:
-
-| Write          | Date                  |
-| -------------- | --------------------- |
-| next week      | next Monday           |
-| next [month]   | 1st of next month     |
-| mid [month]    | 15th of the month     |
-| end of [month] | last day of the month |
-
 If a date is not recognized, the link won't be created.
 
-### Date Autosuggest
+## Date Autosuggest
 
-![date-autosuggest](assets/date-autosuggest.png)
+<img src="https://user-images.githubusercontent.com/693981/116645561-1d565700-a944-11eb-9166-f55e72dc65bc.gif" alt="autosuggest-demo" width="500" />
 
 Expand dates using natural language inline within the editor view.
 
@@ -36,7 +26,7 @@ Typing `@today` <kbd>Enter</kbd> will automatically be expanded to the current d
 | Trigger phrase  | Character(s) required to open the autosuggest           | `@`     |
 | Insert as link? | Dates will be inserted as wikilinks (i.e. `[[<date>]]`) | Yes     |
 
-### `nldates` URI Action
+## `nldates` URI Action
 
 It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) to open daily notes using natural language by using the nldates action `obsidian://nldates?day=<date here>`. Don't forget to [encode space characters](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI#Encoding) appropriately.
 
@@ -45,7 +35,7 @@ It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Adv
 | `day`                          | natural language date string            |
 | `newPane`                      | open note in new pane, default is `yes` |
 
-## Commands and hotkeys
+### Commands and Hotkeys
 
 Starting on v0.3.2, in addition to the hotkey to parse the selected date, the following commands are also available (note that hotkeys are unset by default starting on v0.4.1):
 
@@ -55,7 +45,7 @@ Starting on v0.3.2, in addition to the hotkey to parse the selected date, the fo
 
 Opens the date picker menu
 
-### Other Commands
+#### Other Commands
 
 | Setting                                     | Description                                                                                                                                                                                                                                                                                                                                                                       | Default                       |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
@@ -69,13 +59,27 @@ Opens the date picker menu
 
 **Note:** You can of course add hotkeys to each of these commands.
 
-## Demo
+## Usage
+
+### Examples
+
+The parser supports most date/time formats, including:
+
+- Today, Tomorrow, Yesterday, Last Friday, etc
+- 17 August 2013 - 19 August 2013
+- This Friday from 13:00 - 16.00
+- 5 days ago
+- 2 weeks from now
+- Sat Aug 17 2013 18:40:39 GMT+0900 (JST)
+- 2014-11-30T08:15:30-05:30
+
+### Demo
 
 <img src="https://user-images.githubusercontent.com/5426039/89716767-1d768700-d9b0-11ea-99cf-b3bb6846a872.gif" alt="demo" style="zoom:60%;" />
 
-**Note**:
-The parser will replace all the selected text, meaning that in a sentence you should only select the dates to be parsed and not the full sentence.  
-In the example sentence `Do this thing by tomorrow`, only the word `tomorrow` should be selected. Alternatively, keep in mind that you can place your cursor **on** or **next to** the word tomorrow, and it will be replaced:
+> **Note**:
+> The parser will replace all the selected text, meaning that in a sentence you should only select the dates to be parsed and not the full sentence.  
+> In the example sentence `Do this thing by tomorrow`, only the word `tomorrow` should be selected. Alternatively, keep in mind that you can place your cursor **on** or **next to** the word tomorrow, and it will be replaced:
 
 <img src="https://user-images.githubusercontent.com/5426039/98358876-a640a580-2027-11eb-8efc-015362a94321.gif" alt="Supported selections" style="zoom:80%;" />
 
@@ -89,8 +93,18 @@ Unzip the [latest release](https://github.com/argenos/nldates-obsidian/releases/
 
 ## About
 
-Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
-To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut or the command palette (`Ctrl + P`).
+Powered by the [chrono](https://github.com/wanasit/chrono) library and some custom parsing.
+
+### Custom Parsing
+
+The only behaviours I changed were the following:
+
+| Write          | Date                  |
+| -------------- | --------------------- |
+| next week      | next Monday           |
+| next [month]   | 1st of next month     |
+| mid [month]    | 15th of the month     |
+| end of [month] | last day of the month |
 
 ## For Developers
 
