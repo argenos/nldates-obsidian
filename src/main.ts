@@ -1,4 +1,11 @@
-import { Plugin } from "obsidian";
+import { Moment } from "moment";
+import {
+  EditorRange,
+  MarkdownView,
+  ObsidianProtocolData,
+  Plugin,
+  TFile,
+} from "obsidian";
 
 import {
   createDailyNote,
@@ -7,15 +14,16 @@ import {
 } from "obsidian-daily-notes-interface";
 
 import DatePickerModal from "./modals/date-picker";
-import { NLDResult, getParsedDate } from "./parser";
+import NLDParser, { NLDResult } from "./parser";
 import { NLDSettingsTab, NLDSettings, DEFAULT_SETTINGS } from "./settings";
 import DateSuggest from "./suggest/date-suggest";
 
 export default class NaturalLanguageDates extends Plugin {
-  autosuggest: DateSuggest;
-  settings: NLDSettings;
+  private parser: NLDParser;
+  private autosuggest: DateSuggest;
+  public settings: NLDSettings;
 
-  async onload() {
+  async onload(): Promise<void> {
     console.log("Loading natural language date parser plugin");
     await this.loadSettings();
 
@@ -87,84 +95,96 @@ export default class NaturalLanguageDates extends Plugin {
       this.actionHandler.bind(this)
     );
 
-    if (this.settings.isAutosuggestEnabled) {
-      this.autosuggest = new DateSuggest(this.app, this);
-    }
+    this.tryToSetupAutosuggest();
 
-    this.registerCodeMirror((cm: CodeMirror.Editor) => {
-      cm.on(
-        "change",
-        (cmEditor: CodeMirror.Editor, changeObj: CodeMirror.EditorChange) => {
-          return (
-            this.autosuggest && this.autosuggest.update(cmEditor, changeObj)
-          );
-        }
-      );
+    this.app.workspace.onLayoutReady(() => {
+      // initialize the parser when layout is ready so that the correct locale is used
+      this.parser = new NLDParser();
     });
   }
 
-  onunload() {
+  onunload(): void {
     console.log("Unloading natural language date parser plugin");
   }
 
-  async loadSettings() {
+  tryToSetupAutosuggest(): void {
+    if (
+      this.settings.autocompleteTriggerPhrase &&
+      this.settings.isAutosuggestEnabled
+    ) {
+      this.autosuggest = new DateSuggest(this.app, this);
+
+      this.registerCodeMirror((cm: CodeMirror.Editor) => {
+        cm.on("change", this.autosuggestHandler);
+      });
+    } else {
+      this.autosuggest = null;
+      this.registerCodeMirror((cm: CodeMirror.Editor) => {
+        cm.off("change", this.autosuggestHandler);
+      });
+    }
+  }
+
+  autosuggestHandler = (
+    cmEditor: CodeMirror.Editor,
+    changeObj: CodeMirror.EditorChange
+  ): boolean => {
+    return this.autosuggest?.update(cmEditor, changeObj);
+  };
+
+  async loadSettings(): Promise<void> {
     this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
   }
 
-  async saveSettings() {
-    // rebuild autosuggest in case trigger phrase changed
-    if (this.settings.isAutosuggestEnabled) {
-      this.autosuggest = new DateSuggest(this.app, this);
-    } else {
-      this.autosuggest = null;
-    }
-
+  async saveSettings(): Promise<void> {
+    // rebuild autosuggest in case trigger phrase changed, or it was disabled
+    this.tryToSetupAutosuggest();
     await this.saveData(this.settings);
   }
 
-  getSelectedText(editor: any) {
+  getSelectedText(editor: CodeMirror.Editor): string {
     if (editor.somethingSelected()) {
       return editor.getSelection();
     } else {
-      var wordBoundaries = this.getWordBoundaries(editor);
-      editor.getDoc().setSelection(wordBoundaries.start, wordBoundaries.end);
+      const wordBoundaries = this.getWordBoundaries(editor);
+      editor.getDoc().setSelection(wordBoundaries.from, wordBoundaries.to);
       return editor.getSelection();
     }
   }
 
-  getWordBoundaries(editor: any) {
-    var cursor = editor.getCursor();
-    var line = cursor.line;
-    var word = editor.findWordAt({
+  getWordBoundaries(editor: CodeMirror.Editor): EditorRange {
+    const cursor = editor.getCursor();
+    const line = cursor.line;
+    const word = editor.findWordAt({
       line: line,
       ch: cursor.ch,
     });
-    var wordStart = word.anchor.ch;
-    var wordEnd = word.head.ch;
+    const wordStart = word.anchor.ch;
+    const wordEnd = word.head.ch;
 
     return {
-      start: {
+      from: {
         line: line,
         ch: wordStart,
       },
-      end: {
+      to: {
         line: line,
         ch: wordEnd,
       },
     };
   }
 
-  getMoment(date: Date): any {
-    return (window as any).moment(date);
+  getMoment(date: Date): Moment {
+    return window.moment(date);
   }
 
   getFormattedDate(date: Date): string {
-    var formattedDate = this.getMoment(date).format(this.settings.format);
+    const formattedDate = this.getMoment(date).format(this.settings.format);
     return formattedDate;
   }
 
   getFormattedTime(date: Date): string {
-    var formattedTime = this.getMoment(date).format(this.settings.timeFormat);
+    const formattedTime = this.getMoment(date).format(this.settings.timeFormat);
     return formattedTime;
   }
 
@@ -174,46 +194,46 @@ export default class NaturalLanguageDates extends Plugin {
 
   */
   parseDate(dateString: string): NLDResult {
-    let date = getParsedDate(dateString, this.settings.weekStart);
-    let formattedDate = this.getFormattedDate(date);
-    if (formattedDate === "Invalid date") {
+    const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
+    const formattedString = this.getFormattedDate(date);
+    if (formattedString === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
     }
 
-    let result = {
-      formattedString: formattedDate,
-      date: date,
+    return {
+      formattedString,
+      date,
       moment: this.getMoment(date),
     };
-    return result;
   }
 
   parseTime(dateString: string): NLDResult {
-    let date = getParsedDate(dateString, this.settings.weekStart);
-    let formattedTime = this.getFormattedTime(date);
-    if (formattedTime === "Invalid date") {
+    const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
+    const formattedString = this.getFormattedTime(date);
+    if (formattedString === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
     }
 
-    let result = {
-      formattedString: formattedTime,
-      date: date,
+    return {
+      formattedString,
+      date,
       moment: this.getMoment(date),
     };
-    return result;
   }
 
   parseTruthy(flag: string): boolean {
     return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
   }
 
-  onTrigger(mode: string) {
-    let activeLeaf: any = this.app.workspace.activeLeaf;
-    let editor = activeLeaf.view.sourceMode.cmEditor;
-    var cursor = editor.getCursor();
-    var selectedText = this.getSelectedText(editor);
-
-    let date = this.parseDate(selectedText);
+  onTrigger(mode: string): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeView) {
+      return;
+    }
+    const editor = activeView.sourceMode.cmEditor;
+    const cursor = editor.getCursor();
+    const selectedText = this.getSelectedText(editor);
+    const date = this.parseDate(selectedText);
 
     if (!date.moment.isValid()) {
       editor.setCursor({
@@ -222,15 +242,14 @@ export default class NaturalLanguageDates extends Plugin {
       });
     } else {
       //mode == "replace"
-      var newStr = `[[${date.formattedString}]]`;
+      let newStr = `[[${date.formattedString}]]`;
 
       if (mode == "link") {
         newStr = `[${selectedText}](${date.formattedString})`;
       } else if (mode == "clean") {
         newStr = `${date.formattedString}`;
       } else if (mode == "time") {
-        let time = this.parseTime(selectedText);
-
+        const time = this.parseTime(selectedText);
         newStr = `${time.formattedString}`;
       }
 
@@ -240,17 +259,25 @@ export default class NaturalLanguageDates extends Plugin {
     }
   }
 
-  adjustCursor(editor: any, cursor: any, newStr: string, oldStr: string) {
-    var cursorOffset = newStr.length - oldStr.length;
+  adjustCursor(
+    editor: CodeMirror.Editor,
+    cursor: CodeMirror.Position,
+    newStr: string,
+    oldStr: string
+  ): void {
+    const cursorOffset = newStr.length - oldStr.length;
     editor.setCursor({
       line: cursor.line,
       ch: cursor.ch + cursorOffset,
     });
   }
 
-  getNowCommand() {
-    let activeLeaf: any = this.app.workspace.activeLeaf;
-    let editor = activeLeaf.view.sourceMode.cmEditor;
+  getNowCommand(): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeView) {
+      return;
+    }
+    const editor = activeView.sourceMode.cmEditor;
     editor.replaceSelection(
       this.getMoment(new Date()).format(
         `${this.settings.format}${this.settings.separator}${this.settings.timeFormat}`
@@ -258,37 +285,44 @@ export default class NaturalLanguageDates extends Plugin {
     );
   }
 
-  getDateCommand() {
-    let activeLeaf: any = this.app.workspace.activeLeaf;
-    let editor = activeLeaf.view.sourceMode.cmEditor;
+  getDateCommand(): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeView) {
+      return;
+    }
+    const editor = activeView.sourceMode.cmEditor;
     editor.replaceSelection(
       this.getMoment(new Date()).format(this.settings.format)
     );
   }
 
-  getTimeCommand() {
-    let activeLeaf: any = this.app.workspace.activeLeaf;
-    let editor = activeLeaf.view.sourceMode.cmEditor;
+  getTimeCommand(): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    if (!activeView) {
+      return;
+    }
+    const editor = activeView.sourceMode.cmEditor;
     editor.replaceSelection(
       this.getMoment(new Date()).format(this.settings.timeFormat)
     );
   }
 
-  insertDateString(dateString: string, editor: any, cursor: any) {
+  insertDateString(
+    dateString: string,
+    editor: CodeMirror.Editor,
+    _cursor: CodeMirror.Position
+  ): void {
     editor.replaceSelection(dateString);
   }
 
-  getDateRange() {}
-
-  async actionHandler(params: any) {
-    let date = this.parseDate(params.day);
-    let newPane = this.parseTruthy(params.newPane || "yes");
-
-    console.log(date);
+  async actionHandler(params: ObsidianProtocolData): Promise<void> {
     const { workspace } = this.app;
 
+    const date = this.parseDate(params.day);
+    const newPane = this.parseTruthy(params.newPane || "yes");
+
     if (date.moment.isValid()) {
-      let dailyNote = await this.getDailyNote(date.moment);
+      const dailyNote = await this.getDailyNote(date.moment);
 
       let leaf = workspace.activeLeaf;
       if (newPane) {
@@ -301,16 +335,13 @@ export default class NaturalLanguageDates extends Plugin {
     }
   }
 
-  getDailyNote(date: any) {
+  async getDailyNote(date: Moment): Promise<TFile | null> {
     // Borrowed from the Slated plugin:
     // https://github.com/tgrosinger/slated-obsidian/blob/main/src/vault.ts#L17
     const desiredNote = getDailyNote(date, getAllDailyNotes());
     if (desiredNote) {
-      console.log("Note exists");
       return Promise.resolve(desiredNote);
-    } else {
-      console.log("Creating daily note");
-      return Promise.resolve(createDailyNote(date));
     }
+    return createDailyNote(date);
   }
 }

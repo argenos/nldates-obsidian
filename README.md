@@ -1,73 +1,87 @@
-# Natural language dates in Obsidian
+# Natural Language Dates in Obsidian
 
-Create date links using natural language processing using [chrono](https://github.com/wanasit/chrono) and some custom parsing.
-To create a date link, select the text you want to change (e.g. `today`), and use the `NLP date` command. You can use the shortcut or the command palette (`Ctrl + P`).
-For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first. It's also possible to use dates like Nov9, 25Dec to use this trick.
+Insert timestamps and cross-link your daily notes with the flexibility of natural language. NLDates provides a suite of tools that makes working with dates and times within Obsidian frictionless.
 
-You can try with any of the standard dates, i.e. today, tomorrow, in 3 weeks, in 5 months, etc.
-The only behaviours I changed were the following:
+## Features
 
-| Write | Date |
-| ----- | ---- |
-|   next week    | next Monday      |
-|   next [month]    |  1st of next month     |
-|   mid [month]   | 15th of the month      |
-|   end of [month]    |  last day of the month     |
+- [Date Autosuggest](#date-autosuggest)
+- [Custom `nldates` Obsidian URI](#nldates-uri-action)
+- [Date Picker](#natural-language-dates-date-picker)
 
 If a date is not recognized, the link won't be created.
 
-#### [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) **New in v0.4.0**
+## Date Autosuggest
+
+<img src="https://user-images.githubusercontent.com/693981/116645561-1d565700-a944-11eb-9166-f55e72dc65bc.gif" alt="autosuggest-demo" width="500" />
+
+Expand dates using natural language inline within the editor view.
+
+Typing `@today` <kbd>Enter</kbd> will automatically be expanded to the current date.
+
+### Configuration
+
+| Setting         | Description                                             | Default |
+| --------------- | ------------------------------------------------------- | ------- |
+| Enable/Disable  | A global toggle to enable or disable the autosuggest    | Enabled |
+| Trigger phrase  | Character(s) required to open the autosuggest           | `@`     |
+| Insert as link? | Dates will be inserted as wikilinks (i.e. `[[<date>]]`) | Yes     |
+
+## `nldates` URI Action
 
 It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI) to open daily notes using natural language by using the nldates action `obsidian://nldates?day=<date here>`. Don't forget to [encode space characters](https://publish.obsidian.md/help/Advanced+topics/Using+obsidian+URI#Encoding) appropriately.
 
-| `obsidian://nldates` Parameter | Description |
-| ---------                      | ----------- |
-| `day`                          | natural language date string |
+| `obsidian://nldates` Parameter | Description                             |
+| ------------------------------ | --------------------------------------- |
+| `day`                          | natural language date string            |
 | `newPane`                      | open note in new pane, default is `yes` |
 
-## Commands and hotkeys
+### Commands and Hotkeys
 
-Starting on v0.3.2, in addition to the hotkey to parse the selected date, the following commands are also available (note that hotkeys are unset by default starting on v0.4.1):
+`nldates` adds a few commands to work with dates in natural language. You can add custom hotkeys for them by going to `Settings > Hotkeys` and filtering by `Natural Language Dates` (Note that hotkeys are unset by default starting on **v0.4.1**).
+
 
 #### Natural Language Dates: Date Picker
+
+
+<img src="assets/date-picker.png" alt="date-picker" width="400" />
+
 Opens the date picker menu
-<br>
-<img src="https://user-images.githubusercontent.com/5426039/99131292-0d0b2380-2613-11eb-8469-20d510fa2074.png" alt="Three commands to insert the current date, current time and a combination of both." style="zoom:75%;" />
 
-#### Natural Language Dates: Insert current date
-Inserts the current date, using the format specified in the settings menu. (default output `YYYY-MM-DD`)
+#### Other Commands
 
-#### Natural Language Dates: Insert current time
-Inserts the current time, using the format specified in the settings menu. (default output `HH:mm`)
+| Setting                                     | Description                                                                                                                                                                                                                                                                                                                                                                       | Default                       |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Insert current date                         | Inserts the current date, using the format specified in the settings menu                                                                                                                                                                                                                                                                                                         | `YYYY-MM-DD`                  |
+| Insert current time                         | Inserts the current time, using the format specified in the settings menu                                                                                                                                                                                                                                                                                                         | `HH:mm`                       |
+| Insert current date and time                | Inserts the current date, using the format specified in the settings menu                                                                                                                                                                                                                                                                                                         | `YYYY-MM-DD HH:mm`            |
+| Parse natural language date                 | Parses the selected text as a natural language date. Replaces selected text with an obsidian link to the parsed date in the format specified in the settings menu. <br /><br />For single-word dates (e.g. today, tomorrow, friday, etc.), it's possible to use the command without selecting the word first. It's also possible to use dates like Nov9, 25Dec to use this trick. | `[[YYYY-MM-DD]]`              |
+| Parse natural language time                 | Parses the selected text as a natural language time. Replaces selected text with the parsed time stamp in the format specified in the settings menu. You can try with any of the standard times, i.e. now, in 15min, in 1h, 5min ago, etc.                                                                                                                                        | `HH:mm`                       |
+| Parse natural language date (as link)       | Parses the selected text as a natural language date. Replaces selected text with a standard markdown link to the parsed date in the format specified in the settings menu                                                                                                                                                                                                         | `[selected text](YYYY-MM-DD)` |
+| Parse natural language date (as plain text) | Parses the selected text as a natural language date. Replaces selected text with a plain text parsed date in the format specified in the settings menu                                                                                                                                                                                                                            | `YYYY-MM-DD`                  |
 
-#### Natural Language Dates: Insert current date and time
-Inserts the current date, using the format specified in the settings menu. (default output `YYYY-MM-DD HH:mm`)
+**Note:** You can of course add hotkeys to each of these commands.
 
-#### Natural Language Dates: Parse natural language date
-Parses the selected text as a natural language date. Replaces selected text with an obsidian link to the parsed date in the format specified in the settings menu (default `[[YYYY-MM-DD]]`).
+## Usage
 
-#### Natural Language Dates: Parse natural language time
-Parses the selected text as a natural language time. Replaces selected text with the parsed time stamp in the format specified in the settings menu (default `HH:mm`).
+### Examples
 
-You can try with any of the standard times, i.e. now, in 15min, in 1h, 5min ago, etc.
+The parser supports most date/time formats, including:
 
-#### Natural Language Dates: Parse natural language date (as link)
-Parses the selected text as a natural language date. Replaces selected text with a standard markdown link to the parsed date in the format specified in the settings menu (default `[selected text](YYYY-MM-DD)`).
+- Today, Tomorrow, Yesterday, Last Friday, etc
+- 17 August 2013 - 19 August 2013
+- This Friday from 13:00 - 16.00
+- 5 days ago
+- 2 weeks from now
+- Sat Aug 17 2013 18:40:39 GMT+0900 (JST)
+- 2014-11-30T08:15:30-05:30
 
-#### Natural Language Dates: Parse natural language date (as plain text)
-Parses the selected text as a natural language date. Replaces selected text with a plain text parsed date in the format specified in the settings menu (default `YYYY-MM-DD`).
-
-
-__You can of course add hotkeys to each of these commands.__
-
-
-## Demo
+### Demo
 
 <img src="https://user-images.githubusercontent.com/5426039/89716767-1d768700-d9b0-11ea-99cf-b3bb6846a872.gif" alt="demo" style="zoom:60%;" />
 
-**Note**:
-The parser will replace all the selected text, meaning that in a sentence you should only select the dates to be parsed and not the full sentence.  
-In the example sentence `Do this thing by tomorrow`, only the word `tomorrow` should be selected. Alternatively, keep in mind that you can place your cursor **on** or **next to** the word tomorrow, and it will be replaced:
+> **Note**:
+> The parser will replace all the selected text, meaning that in a sentence you should only select the dates to be parsed and not the full sentence.  
+> In the example sentence `Do this thing by tomorrow`, only the word `tomorrow` should be selected. Alternatively, keep in mind that you can place your cursor **on** or **next to** the word tomorrow, and it will be replaced:
 
 <img src="https://user-images.githubusercontent.com/5426039/98358876-a640a580-2027-11eb-8efc-015362a94321.gif" alt="Supported selections" style="zoom:80%;" />
 
@@ -79,31 +93,60 @@ In Obsidian go to `Settings > Third-party plugins > Community Plugins > Browse` 
 
 Unzip the [latest release](https://github.com/argenos/nldates-obsidian/releases/latest) into your `<vault>/.obsidian/plugins/` folder.
 
+## About
+
+Powered by the [chrono](https://github.com/wanasit/chrono) library and some custom parsing.
+
+### Custom Parsing
+
+The only behaviours I changed were the following:
+
+| Write          | Date                  |
+| -------------- | --------------------- |
+| next week      | next Monday           |
+| next [month]   | 1st of next month     |
+| mid [month]    | 15th of the month     |
+| end of [month] | last day of the month |
+
 ## For Developers
 
-You can use the method `parsedDate` to parse dates. It takes a string as an argument, and returns a `NLDResult`:
+NLDates provides an interface for you to parse natural language dates in your plugin. The `parsedDate()` function is available on the NaturalLanguageDates plugin instance. It has the following signature:
 
-```typescript
+```ts
 interface NLDResult {
   formattedString: string;
   date: Date;
-  moment: any; // This is actually a Moment object
+  moment: Moment;
 }
+
+function parseDate(date: string): NLDResult;
 ```
 
 - The `formattedString` will return the date formatted according to the settings of `nldates` and without the square brackets.
 - The `date` object is what is returned by the `parseDate` method of the custom parser (using the [chrono](https://github.com/wanasit/chrono) package).
-- The `Moment` object is created with the `date` object, [cloning it](https://momentjs.com/docs/#/parsing/date/).
+- The `moment` object is created with the `date` object.
+
+### Example Usage
+
+```ts
+const nldatesPlugin = obsidianApp.plugins.getPlugin("nldates-obsidian");
+const parsedResult = nldatesPlugin.parseDate("next year");
+console.log(parsedResult.moment.format("YYYY")); // This should return 2021
+```
+
+### Manipulating the `moment` instance
+
 If you need, you can further [manipulate](https://momentjs.com/docs/#/manipulating/) or [format](https://momentjs.com/docs/#/displaying/) the moment object, for example:
 
-    ```typescript
-    let nldatesPlugin = obsidianApp.plugins.getPlugin('nldates-obsidian');
-    let parsedResult = nldatesPlugin.parseDate("next year");
-    console.log(parsedResult.moment.format("YYYY")); //This should return 20201
-    console.log(parsedResult.moment.fromNow()) // "In two months"
-    parsedResult = nldatesPlugin.parseDate("today at 21:00");
-    console.log(parsedResult.moment.add(1, "hour")); // This would change the Moment to 22:00
+```typescript
+const nldatesPlugin = obsidianApp.plugins.getPlugin("nldates-obsidian");
+const nextYear = nldatesPlugin.parseDate("next year");
 
-    ```
+console.log(nextYear.moment.format("YYYY")); // This should return 2021
+console.log(nextYear.moment.fromNow()); // "In two months"
 
-    Note that if you manipulate the `parsedResult.moment`, the `date` and `formattedString` won't be updated. If you don't want to alter the `parsedResult.moment`, you should clone it. Read more about that [here](https://momentjs.com/docs/#/parsing/date/).
+const thisEvening = nldatesPlugin.parseDate("today at 21:00");
+console.log(thisEvening.moment.add(1, "hour")); // This would change the Moment to 22:00
+```
+
+Note that if you manipulate the `parsedResult.moment`, the `date` and `formattedString` won't be updated. If you don't want to alter the `parsedResult.moment`, you should clone it. Read more about that on [the moment.js docs site](https://momentjs.com/docs/#/parsing/date/).

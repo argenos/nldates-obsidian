@@ -2,6 +2,7 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import NaturalLanguageDates from "./main";
 
 export interface NLDSettings {
+  autosuggestToggleLink: boolean;
   autocompleteTriggerPhrase: string;
   isAutosuggestEnabled: boolean;
 
@@ -16,6 +17,7 @@ export interface NLDSettings {
 }
 
 export const DEFAULT_SETTINGS: NLDSettings = {
+  autosuggestToggleLink: true,
   autocompleteTriggerPhrase: "@",
   isAutosuggestEnabled: true,
 
@@ -38,7 +40,7 @@ export class NLDSettingsTab extends PluginSettingTab {
   }
 
   display(): void {
-    let { containerEl } = this;
+    const { containerEl } = this;
 
     containerEl.empty();
 
@@ -58,11 +60,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setDefaultFormat("YYYY-MM-DD")
           .setValue(this.plugin.settings.format)
           .onChange(async (value) => {
-            if (value === "") {
-              this.plugin.settings.format = "YYYY-MM-DD";
-            } else {
-              this.plugin.settings.format = value.trim();
-            }
+            this.plugin.settings.format = value || "YYYY-MM-DD";
             await this.plugin.saveSettings();
           })
       );
@@ -76,7 +74,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .addOption("Sunday", "Sunday")
           .setValue(this.plugin.settings.weekStart)
           .onChange(async (value) => {
-            this.plugin.settings.weekStart = value.trim();
+            this.plugin.settings.weekStart = value;
             await this.plugin.saveSettings();
           })
       );
@@ -93,11 +91,7 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setDefaultFormat("HH:mm")
           .setValue(this.plugin.settings.timeFormat)
           .onChange(async (value) => {
-            if (value === "") {
-              this.plugin.settings.timeFormat = "HH:mm";
-            } else {
-              this.plugin.settings.timeFormat = value.trim();
-            }
+            this.plugin.settings.timeFormat = value || "HH:mm";
             await this.plugin.saveSettings();
           })
       );
@@ -129,6 +123,20 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.isAutosuggestEnabled)
           .onChange(async (value) => {
             this.plugin.settings.isAutosuggestEnabled = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Add dates as link?")
+      .setDesc(
+        "If enabled, dates created via autosuggest will be wrapped in [[wikilinks]]"
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.autosuggestToggleLink)
+          .onChange(async (value) => {
+            this.plugin.settings.autosuggestToggleLink = value;
             await this.plugin.saveSettings();
           })
       );
