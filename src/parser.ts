@@ -48,11 +48,18 @@ export default class NLDParser {
   getParsedDate(selectedText: string, weekStart: string): Date {
     const parser = this.chrono;
 
+    const initialParse = parser.parse(selectedText);
+    const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
+
     const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
     const lastDayOfMatch = selectedText.match(
       /(last day of|end of)\s*([^\n\r]*)/i
     );
     const midOf = selectedText.match(/mid\s([\w]+)/i);
+
+    const referenceDate = weekdayIsCertain
+      ? window.moment().weekday(0).toDate()
+      : new Date();
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
       return parser.parseDate(`next ${weekStart}`, new Date(), {
@@ -95,6 +102,6 @@ export default class NLDParser {
       });
     }
 
-    return parser.parseDate(selectedText, new Date());
+    return parser.parseDate(selectedText, referenceDate);
   }
 }
