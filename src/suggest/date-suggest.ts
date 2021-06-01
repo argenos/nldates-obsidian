@@ -120,7 +120,7 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
     if (suggestion.label.startsWith("time:")) {
-      let [_, timePart] = suggestion.label.split(":")
+      const timePart = suggestion.label.substring(5);
       dateStr = this.plugin.parseTime(timePart).formattedString;
       makeIntoLink = false;
     } else {
