@@ -11,7 +11,6 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app, plugin.settings.autocompleteTriggerPhrase);
     this.plugin = plugin;
-
     this.updateInstructions();
   }
 
@@ -53,6 +52,17 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
   }
 
   getDateSuggestions(inputStr: string): IDateCompletion[] {
+    if (inputStr.match(/^time/)) {
+      return [
+        "now",
+        "+15 minutes",
+        "+1 hour",
+        "-15 minutes",
+        "-1 hour",
+      ]
+        .map(val => ({label: `time:${val}`}))
+        .filter(item => item.label.toLowerCase().startsWith(inputStr));
+    }
     if (inputStr.match(/(next|last|this)/i)) {
       const reference = inputStr.match(/(next|last|this)/i)[1];
       return [
@@ -106,9 +116,18 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
 
     const head = this.getStartPos();
     const anchor = this.cmEditor.getCursor();
+    let dateStr = "";
+    let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
-    let dateStr = this.plugin.parseDate(suggestion.label).formattedString;
-    if (this.plugin.settings.autosuggestToggleLink) {
+    if (suggestion.label.startsWith("time:")) {
+      const timePart = suggestion.label.substring(5);
+      dateStr = this.plugin.parseTime(timePart).formattedString;
+      makeIntoLink = false;
+    } else {
+      dateStr = this.plugin.parseDate(suggestion.label).formattedString;
+    }
+
+    if (makeIntoLink) {
       if (includeAlias) {
         dateStr = `[[${dateStr}|${suggestion.label}]]`;
       } else {
