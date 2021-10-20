@@ -181,13 +181,11 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   getFormattedDate(date: Date): string {
-    const formattedDate = this.getMoment(date).format(this.settings.format);
-    return formattedDate;
+    return this.getMoment(date).format(this.settings.format);
   }
 
   getFormattedTime(date: Date): string {
-    const formattedTime = this.getMoment(date).format(this.settings.timeFormat);
-    return formattedTime;
+    return this.getMoment(date).format(this.settings.timeFormat);
   }
 
   /*
