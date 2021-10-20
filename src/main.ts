@@ -32,28 +32,28 @@ export default class NaturalLanguageDates extends Plugin {
     this.addCommand({
       id: "nlp-dates",
       name: "Parse natural language date",
-      callback: () => this.onTrigger("replace"),
+      callback: () => this.getParseCommand("replace"),
       hotkeys: [],
     });
 
     this.addCommand({
       id: "nlp-dates-link",
       name: "Parse natural language date (as link)",
-      callback: () => this.onTrigger("link"),
+      callback: () => this.getParseCommand("link"),
       hotkeys: [],
     });
 
     this.addCommand({
       id: "nlp-date-clean",
       name: "Parse natural language date (as plain text)",
-      callback: () => this.onTrigger("clean"),
+      callback: () => this.getParseCommand("clean"),
       hotkeys: [],
     });
 
     this.addCommand({
       id: "nlp-parse-time",
       name: "Parse natural language time",
-      callback: () => this.onTrigger("time"),
+      callback: () => this.getParseCommand("time"),
       hotkeys: [],
     });
 
@@ -67,14 +67,14 @@ export default class NaturalLanguageDates extends Plugin {
     this.addCommand({
       id: "nlp-today",
       name: "Insert the current date",
-      callback: () => this.getDateCommand(),
+      callback: () => this.getCurrentDateCommand(),
       hotkeys: [],
     });
 
     this.addCommand({
       id: "nlp-time",
       name: "Insert the current time",
-      callback: () => this.getTimeCommand(),
+      callback: () => this.getCurrentTimeCommand(),
       hotkeys: [],
     });
 
@@ -227,37 +227,42 @@ export default class NaturalLanguageDates extends Plugin {
     return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
   }
 
-  onTrigger(mode: string): void {
-    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!activeView) {
-      return;
-    }
-    const editor = activeView.sourceMode.cmEditor;
-    const cursor = editor.getCursor();
-    const selectedText = this.getSelectedText(editor);
-    const date = this.parseDate(selectedText);
+  getParseCommand(mode: string): void {
+    const { workspace } = this.app;
+    const activeView = workspace.getActiveViewOfType(MarkdownView);
 
-    if (!date.moment.isValid()) {
-      editor.setCursor({
-        line: cursor.line,
-        ch: cursor.ch,
-      });
-    } else {
-      //mode == "replace"
-      let newStr = `[[${date.formattedString}]]`;
+    if (activeView) {
+      // The active view might not be a markdown view
+      const editor = activeView.editor;
+      const cursor = editor.getCursor();
+      const selectedText = this.getSelectedText(editor);
 
-      if (mode == "link") {
-        newStr = `[${selectedText}](${date.formattedString})`;
-      } else if (mode == "clean") {
-        newStr = `${date.formattedString}`;
-      } else if (mode == "time") {
-        const time = this.parseTime(selectedText);
-        newStr = `${time.formattedString}`;
+      let date = this.parseDate(selectedText);
+
+      if (!date.moment.isValid()) {
+        // Do nothing
+        editor.setCursor({
+          line: cursor.line,
+          ch: cursor.ch,
+        });
+      } else {
+        //mode == "replace"
+        let newStr = `[[${date.formattedString}]]`;
+
+        if (mode == "link") {
+          newStr = `[${selectedText}](${date.formattedString})`;
+        } else if (mode == "clean") {
+          newStr = `${date.formattedString}`;
+        } else if (mode == "time") {
+          let time = this.parseTime(selectedText);
+
+          newStr = `${time.formattedString}`;
+        }
+
+        editor.replaceSelection(newStr);
+        this.adjustCursor(editor, cursor, newStr, selectedText);
+        editor.focus();
       }
-
-      editor.replaceSelection(newStr);
-      this.adjustCursor(editor, cursor, newStr, selectedText);
-      editor.focus();
     }
   }
 
@@ -274,39 +279,33 @@ export default class NaturalLanguageDates extends Plugin {
     });
   }
 
+  insertMomentCommand(date: Date, format: string) {
+    const { workspace } = this.app;
+    const activeView = workspace.getActiveViewOfType(MarkdownView);
+
+    if (activeView) {
+      // The active view might not be a markdown view
+      const editor = activeView.editor;
+      editor.replaceSelection(this.getMoment(date).format(format));
+    }
+  }
+
   getNowCommand(): void {
-    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!activeView) {
-      return;
-    }
-    const editor = activeView.sourceMode.cmEditor;
-    editor.replaceSelection(
-      this.getMoment(new Date()).format(
-        `${this.settings.format}${this.settings.separator}${this.settings.timeFormat}`
-      )
-    );
+    const format = `${this.settings.format}${this.settings.separator}${this.settings.timeFormat}`;
+    const date = new Date();
+    this.insertMomentCommand(date, format);
   }
 
-  getDateCommand(): void {
-    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!activeView) {
-      return;
-    }
-    const editor = activeView.sourceMode.cmEditor;
-    editor.replaceSelection(
-      this.getMoment(new Date()).format(this.settings.format)
-    );
+  getCurrentDateCommand(): void {
+    const format = this.settings.format;
+    const date = new Date();
+    this.insertMomentCommand(date, format);
   }
 
-  getTimeCommand(): void {
-    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (!activeView) {
-      return;
-    }
-    const editor = activeView.sourceMode.cmEditor;
-    editor.replaceSelection(
-      this.getMoment(new Date()).format(this.settings.timeFormat)
-    );
+  getCurrentTimeCommand(): void {
+    const format = this.settings.timeFormat;
+    const date = new Date();
+    this.insertMomentCommand(date, format);
   }
 
   insertDateString(
