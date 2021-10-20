@@ -5,6 +5,8 @@ import {
   ObsidianProtocolData,
   Plugin,
   TFile,
+  Editor,
+  EditorPosition,
 } from "obsidian";
 
 import {
@@ -142,12 +144,12 @@ export default class NaturalLanguageDates extends Plugin {
     await this.saveData(this.settings);
   }
 
-  getSelectedText(editor: CodeMirror.Editor): string {
+  getSelectedText(editor: Editor): string {
     if (editor.somethingSelected()) {
       return editor.getSelection();
     } else {
       const wordBoundaries = this.getWordBoundaries(editor);
-      editor.getDoc().setSelection(wordBoundaries.from, wordBoundaries.to);
+      editor.setSelection(wordBoundaries.from, wordBoundaries.to); // TODO check if this needs to be updated/improved
       return editor.getSelection();
     }
   }
@@ -260,8 +262,8 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   adjustCursor(
-    editor: CodeMirror.Editor,
-    cursor: CodeMirror.Position,
+    editor: Editor,
+    cursor: EditorPosition,
     newStr: string,
     oldStr: string
   ): void {
@@ -309,8 +311,8 @@ export default class NaturalLanguageDates extends Plugin {
 
   insertDateString(
     dateString: string,
-    editor: CodeMirror.Editor,
-    _cursor: CodeMirror.Position
+    editor: Editor,
+    _cursor: EditorPosition
   ): void {
     editor.replaceSelection(dateString);
   }

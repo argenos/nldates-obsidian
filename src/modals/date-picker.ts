@@ -1,10 +1,10 @@
-import { App, MarkdownView, Modal, Setting } from "obsidian";
+import { App, MarkdownView, Modal, Setting, Editor, EditorPosition } from "obsidian";
 import NaturalLanguageDates from "../main";
 
 export default class DatePickerModal extends Modal {
   activeView: MarkdownView;
-  activeEditor: CodeMirror.Editor;
-  activeCursor: CodeMirror.Position;
+  activeEditor: Editor;
+  activeCursor: EditorPosition;
   plugin: NaturalLanguageDates;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
@@ -12,7 +12,7 @@ export default class DatePickerModal extends Modal {
     this.plugin = plugin;
     this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (this.activeView) {
-      this.activeEditor = this.activeView.sourceMode.cmEditor;
+      this.activeEditor = this.activeView.editor;
       this.activeCursor = this.activeEditor.getCursor();
     }
   }
