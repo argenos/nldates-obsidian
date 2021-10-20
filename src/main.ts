@@ -154,26 +154,49 @@ export default class NaturalLanguageDates extends Plugin {
     }
   }
 
-  getWordBoundaries(editor: CodeMirror.Editor): EditorRange {
+  getWordBoundaries(editor: any): EditorRange {
     const cursor = editor.getCursor();
-    const line = cursor.line;
-    const word = editor.findWordAt({
-      line: line,
-      ch: cursor.ch,
-    });
-    const wordStart = word.anchor.ch;
-    const wordEnd = word.head.ch;
 
-    return {
-      from: {
+    if (editor.cm instanceof window.CodeMirror) {
+      // CM5
+      const line = cursor.line;
+      const word = editor.findWordAt({
         line: line,
-        ch: wordStart,
-      },
-      to: {
-        line: line,
-        ch: wordEnd,
-      },
-    };
+        ch: cursor.ch,
+      });
+      const wordStart = word.anchor.ch;
+      const wordEnd = word.head.ch;
+
+      return {
+        from: {
+          line: line,
+          ch: wordStart,
+        },
+        to: {
+          line: line,
+          ch: wordEnd,
+        },
+      };
+    } else {
+      // CM6
+      const pos = this.posToOffset(editor.cm.state.doc, cursor);
+      const word = editor.cm.state.wordAt(pos);
+      const wordStart = this.offsetToPos(editor.cm.state.doc, word.from);
+      const wordEnd = this.offsetToPos(editor.cm.state.doc, word.to);
+      return {
+        from: wordStart,
+        to: wordEnd,
+      };
+    }
+  }
+
+  posToOffset(doc: any, pos: any) {
+    return doc.line(pos.line + 1).from + pos.ch;
+  }
+
+  offsetToPos(doc: any, offset: any) {
+    let line = doc.lineAt(offset);
+    return { line: line.number - 1, ch: offset - line.from };
   }
 
   getMoment(date: Date): Moment {
