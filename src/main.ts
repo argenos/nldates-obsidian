@@ -3,8 +3,6 @@ import {
   ObsidianProtocolData,
   Plugin,
   TFile,
-  Editor,
-  EditorPosition,
 } from "obsidian";
 
 import {
@@ -27,7 +25,6 @@ import { getMoment, getFormattedDate } from "./utils";
 
 export default class NaturalLanguageDates extends Plugin {
   private parser: NLDParser;
-  private autosuggest: DateSuggest;
   public settings: NLDSettings;
 
   async onload(): Promise<void> {
@@ -102,7 +99,7 @@ export default class NaturalLanguageDates extends Plugin {
       this.actionHandler.bind(this)
     );
 
-    this.tryToSetupAutosuggest();
+    this.registerEditorSuggest(new DateSuggest(this.app, this));
 
     this.app.workspace.onLayoutReady(() => {
       // initialize the parser when layout is ready so that the correct locale is used
@@ -114,38 +111,11 @@ export default class NaturalLanguageDates extends Plugin {
     console.log("Unloading natural language date parser plugin");
   }
 
-  tryToSetupAutosuggest(): void {
-    if (
-      this.settings.autocompleteTriggerPhrase &&
-      this.settings.isAutosuggestEnabled
-    ) {
-      this.autosuggest = new DateSuggest(this.app, this);
-
-      this.registerCodeMirror((cm: CodeMirror.Editor) => {
-        cm.on("change", this.autosuggestHandler);
-      });
-    } else {
-      this.autosuggest = null;
-      this.registerCodeMirror((cm: CodeMirror.Editor) => {
-        cm.off("change", this.autosuggestHandler);
-      });
-    }
-  }
-
-  autosuggestHandler = (
-    cmEditor: CodeMirror.Editor,
-    changeObj: CodeMirror.EditorChange
-  ): boolean => {
-    return this.autosuggest?.update(cmEditor, changeObj);
-  };
-
   async loadSettings(): Promise<void> {
     this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
   }
 
   async saveSettings(): Promise<void> {
-    // rebuild autosuggest in case trigger phrase changed, or it was disabled
-    this.tryToSetupAutosuggest();
     await this.saveData(this.settings);
   }
 
@@ -175,11 +145,11 @@ export default class NaturalLanguageDates extends Plugin {
 
   */
   parseDate(dateString: string): NLDResult {
-    return this.parse(dateString, this.settings.format)
+    return this.parse(dateString, this.settings.format);
   }
 
   parseTime(dateString: string): NLDResult {
-    return this.parse(dateString, this.settings.timeFormat)
+    return this.parse(dateString, this.settings.timeFormat);
   }
 
   parseTruthy(flag: string): boolean {
