@@ -1,4 +1,5 @@
 import { App, MarkdownView, Modal, Setting, Editor, EditorPosition } from "obsidian";
+import { insertDatePickerCommand } from "../commands";
 import NaturalLanguageDates from "../main";
 
 export default class DatePickerModal extends Modal {
@@ -103,7 +104,7 @@ export default class DatePickerModal extends Modal {
       formEl.addEventListener("submit", (e: Event) => {
         e.preventDefault();
         this.close();
-        this.plugin.insertDateString(
+        insertDatePickerCommand(
           getDateStr(),
           this.activeEditor,
           this.activeCursor
