@@ -151,12 +151,13 @@ export default class NaturalLanguageDates extends Plugin {
 
   /*
   @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
+  @param format: A string that contains the formatting string for a Moment
   @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
 
   */
-  parseDate(dateString: string): NLDResult {
+  parse(dateString: string, format: string): NLDResult {
     const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
-    const formattedString = getFormattedDate(date, this.settings.format);
+    const formattedString = getFormattedDate(date, format);
     if (formattedString === "Invalid date") {
       console.debug("Input date " + dateString + " can't be parsed by nldates");
     }
@@ -168,18 +169,17 @@ export default class NaturalLanguageDates extends Plugin {
     };
   }
 
-  parseTime(dateString: string): NLDResult {
-    const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
-    const formattedString = getFormattedDate(date, this.settings.timeFormat);
-    if (formattedString === "Invalid date") {
-      console.debug("Input date " + dateString + " can't be parsed by nldates");
-    }
+  /*
+  @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
+  @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
 
-    return {
-      formattedString,
-      date,
-      moment: getMoment(date),
-    };
+  */
+  parseDate(dateString: string): NLDResult {
+    return this.parse(dateString, this.settings.format)
+  }
+
+  parseTime(dateString: string): NLDResult {
+    return this.parse(dateString, this.settings.timeFormat)
   }
 
   parseTruthy(flag: string): boolean {
