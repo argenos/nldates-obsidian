@@ -173,7 +173,6 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     }
 
     const triggerInfo = this.getTriggerInfo(match, cursor);
-    console.log(triggerInfo);
 
     this.startPos = triggerInfo.start;
     this.cmEditor = editor;
