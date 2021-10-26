@@ -9,7 +9,7 @@ export default function getWordBoundaries(editor: any): EditorRange {
   if (editor.cm instanceof window.CodeMirror) {
     // CM5
     const line = cursor.line;
-    word = editor.findWordAt({
+    word = editor.cm.findWordAt({
       line: line,
       ch: cursor.ch,
     });
