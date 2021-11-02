@@ -15,34 +15,14 @@ function getLocalizedChrono(language: string): Chrono {
   const locale = window.moment.locale();
   const gb = locale === "en-gb";
 
-  switch (language) {
-    case "en":
-      return new Chrono(chrono.en.createCasualConfiguration(gb));
-    case "ja":
-      return new Chrono(chrono.ja.createCasualConfiguration());
-    case "fr":
-      return new Chrono(chrono.fr.createCasualConfiguration());
-    case "de":
-      return new Chrono(chrono.de.createCasualConfiguration());
-    case "pt":
-      return new Chrono(chrono.pt.createCasualConfiguration());
-    case "nl":
-      return new Chrono(chrono.nl.createCasualConfiguration());
-    default:
-      return new Chrono(chrono.en.createCasualConfiguration(gb));
-  }
-}
-
-function getConfiguredChrono(language: string): Chrono {
-  const localizedChrono = getLocalizedChrono(language);
-  return localizedChrono;
+  return new Chrono(chrono[language].createCasualConfiguration(gb))
 }
 
 export default class NLDParser {
   chrono: Chrono;
 
   constructor(language: string) {
-    this.chrono = getConfiguredChrono(language);
+    this.chrono = getLocalizedChrono(language);
   }
 
   getParsedDate(selectedText: string, weekStart: string): Date {
