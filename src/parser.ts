@@ -11,38 +11,38 @@ const getLastDayOfMonth = function (y: number, m: number) {
   return new Date(y, m, 0).getDate();
 };
 
-function getLocalizedChrono(): Chrono {
+function getLocalizedChrono(language: string): Chrono {
   const locale = window.moment.locale();
+  const gb = locale === "en-gb";
 
-  switch (locale) {
-    case "en-gb":
-      return new Chrono(chrono.en.createCasualConfiguration(true));
+  switch (language) {
+    case "en":
+      return new Chrono(chrono.en.createCasualConfiguration(gb));
+    case "ja":
+      return new Chrono(chrono.ja.createCasualConfiguration());
+    case "fr":
+      return new Chrono(chrono.fr.createCasualConfiguration());
+    case "de":
+      return new Chrono(chrono.de.createCasualConfiguration());
+    case "pt":
+      return new Chrono(chrono.pt.createCasualConfiguration());
+    case "nl":
+      return new Chrono(chrono.nl.createCasualConfiguration());
     default:
-      return new Chrono(chrono.en.createCasualConfiguration(false));
+      return new Chrono(chrono.en.createCasualConfiguration(gb));
   }
 }
 
-function getConfiguredChrono(): Chrono {
-  const localizedChrono = getLocalizedChrono();
-  localizedChrono.parsers.push({
-    pattern: () => {
-      return /\bChristmas\b/i;
-    },
-    extract: () => {
-      return {
-        day: 25,
-        month: 12,
-      };
-    },
-  });
+function getConfiguredChrono(language: string): Chrono {
+  const localizedChrono = getLocalizedChrono(language);
   return localizedChrono;
 }
 
 export default class NLDParser {
   chrono: Chrono;
 
-  constructor() {
-    this.chrono = getConfiguredChrono();
+  constructor(language: string) {
+    this.chrono = getConfiguredChrono(language);
   }
 
   getParsedDate(selectedText: string, weekStart: string): Date {

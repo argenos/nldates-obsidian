@@ -99,8 +99,12 @@ export default class NaturalLanguageDates extends Plugin {
 
     this.app.workspace.onLayoutReady(() => {
       // initialize the parser when layout is ready so that the correct locale is used
-      this.parser = new NLDParser();
+      this.resetParser();
     });
+  }
+
+  async resetParser(): Promise<void> {
+    this.parser = new NLDParser(this.settings.language);
   }
 
   onunload(): void {

@@ -20,14 +20,14 @@
     "@typescript-eslint/eslint-plugin": "4.22.0",
     "@typescript-eslint/parser": "4.22.0",
     "eslint": "7.25.0",
-    "obsidian": "https://github.com/obsidianmd/obsidian-api/tarball/master",
+    "obsidian": "^0.12.17",
     "prettier": "2.2.1",
     "rollup": "^2.34.1",
     "tslib": "^2.0.3",
     "typescript": "^4.1.2"
   },
   "dependencies": {
-    "chrono-node": "2.2.6",
+    "chrono-node": "2.3.2",
     "obsidian-daily-notes-interface": "0.9.2"
   }
 }
