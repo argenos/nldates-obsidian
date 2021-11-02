@@ -1,6 +1,8 @@
 import { App } from "obsidian";
 import type NaturalLanguageDates from "src/main";
 import CodeMirrorSuggest from "./codemirror-suggest";
+import {translate} from "../locales/languages";
+import {NLDSettings} from "../settings";
 
 interface IDateCompletion {
   label: string;
@@ -87,11 +89,20 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
     }
 
-    return [
-      { label: "Today" },
-      { label: "Yesterday" },
-      { label: "Tomorrow" },
-    ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
+    const languages = this.plugin.settings.languages;
+
+    const result: Array<any> = []
+    languages.forEach(l => {
+      result.push( translate("Today", l))
+      result.push( translate("Yesterday", l) )
+      result.push( translate("Tomorrow", l) )
+    })
+
+    const uniqueArray = result.filter(function(item, pos) {
+      return result.indexOf(item) == pos;
+    })
+
+    return uniqueArray.map(a => ({ label: a })).filter((items) => items.label.toLowerCase().startsWith(inputStr));
   }
 
   renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {

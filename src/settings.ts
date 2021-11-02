@@ -10,7 +10,7 @@ export interface NLDSettings {
   timeFormat: string;
   separator: string;
   weekStart: string;
-  language: string;
+  languages: Array<string>;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   timeFormat: "HH:mm",
   separator: " ",
   weekStart: "Monday",
-  language: "en",
+  languages: ["en"],
 
   modalToggleTime: false,
   modalToggleLink: false,
@@ -39,6 +39,10 @@ export class NLDSettingsTab extends PluginSettingTab {
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app, plugin);
     this.plugin = plugin;
+  }
+
+  parseStringToArray(string: string): Array<string> {
+    return string.split(',');
   }
 
   display(): void {
@@ -84,17 +88,11 @@ export class NLDSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Language")
       .setDesc("Language to parse")
-      .addDropdown((language) =>
+      .addText((language) =>
         language
-            .addOption("en", "English")
-            .addOption("ja", "Japanese")
-            .addOption("fr", "French")
-            .addOption("de", "German (partially supported)")
-            .addOption("pt", "Portuguese (partially supported)")
-            .addOption("nl", "Dutch (under development)")
-            .setValue(this.plugin.settings.language)
+            .setValue(this.plugin.settings.languages.join(','))
             .onChange(async (value) => {
-              this.plugin.settings.language = value;
+              this.plugin.settings.languages = this.parseStringToArray(value);
               await this.plugin.resetParser();
               await this.plugin.saveSettings();
             })
