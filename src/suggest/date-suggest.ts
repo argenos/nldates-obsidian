@@ -2,13 +2,8 @@ import { App } from "obsidian";
 import type NaturalLanguageDates from "src/main";
 import CodeMirrorSuggest from "./codemirror-suggest";
 import {translate} from "../locales/languages";
-import {NLDSettings} from "../settings";
 
-interface IDateCompletion {
-  label: string;
-}
-
-export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
+export default class DateSuggest extends CodeMirrorSuggest<string> {
   plugin: NaturalLanguageDates;
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app, plugin.settings.autocompleteTriggerPhrase);
@@ -44,73 +39,81 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     });
   }
 
-  getSuggestions(inputStr: string): IDateCompletion[] {
+  getSuggestions(inputStr: string): Array<string> {
     // handle no matches
     const suggestions = this.getDateSuggestions(inputStr);
-    if (suggestions.length) {
-      return suggestions;
-    } else {
-      return [{ label: inputStr }];
-    }
+    return suggestions.length ? suggestions : [ inputStr ];
   }
 
-  getDateSuggestions(inputStr: string): IDateCompletion[] {
+  getDateSuggestions(inputStr: string): Array<string> {
     if (inputStr.match(/(next|last|this)/i)) {
-      const reference = inputStr.match(/(next|last|this)/i)[1];
-      return [
-        "week",
-        "month",
-        "year",
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ]
-        .map((val) => ({ label: `${reference} ${val}` }))
-        .filter((items) => items.label.toLowerCase().startsWith(inputStr));
+      return this.getImmediateSuggestions(inputStr);
     }
 
-    const relativeDate =
-      inputStr.match(/^in ([+-]?\d+)/i) || inputStr.match(/^([+-]?\d+)/i);
+    if (inputStr.match(/^(in )?([+-]?\d+)/i)) {
+      return this.getRelativeSuggestions(inputStr);
+    }
+
+    return this.defaultSuggestions(inputStr);
+  }
+
+  private getImmediateSuggestions(inputStr: string): Array<string> {
+    const reference = inputStr.match(/(next|last|this)/i)[1];
+    return [
+      "week",
+      "month",
+      "year",
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ]
+      .map(val => `${reference} ${val}`)
+      .filter(items => items.toLowerCase().startsWith(inputStr));
+  }
+
+  private getRelativeSuggestions(inputStr: string): Array<string> {
+    const relativeDate = inputStr.match(/^(in )?([+-]?\d+)/i);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
       return [
-        { label: `in ${timeDelta} minutes` },
-        { label: `in ${timeDelta} hours` },
-        { label: `in ${timeDelta} days` },
-        { label: `in ${timeDelta} weeks` },
-        { label: `in ${timeDelta} months` },
-        { label: `${timeDelta} days ago` },
-        { label: `${timeDelta} weeks ago` },
-        { label: `${timeDelta} months ago` },
-      ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
+        `in ${timeDelta} minutes`,
+        `in ${timeDelta} hours`,
+        `in ${timeDelta} days`,
+        `in ${timeDelta} weeks`,
+        `in ${timeDelta} months`,
+        `${timeDelta} days ago`,
+        `${timeDelta} weeks ago`,
+        `${timeDelta} months ago`,
+      ].filter(items => items.toLowerCase().startsWith(inputStr));
     }
-
-    const languages = this.plugin.settings.languages;
-
-    const result: Array<any> = []
-    languages.forEach(l => {
-      result.push( translate("Today", l))
-      result.push( translate("Yesterday", l) )
-      result.push( translate("Tomorrow", l) )
-    })
-
-    const uniqueArray = result.filter(function(item, pos) {
-      return result.indexOf(item) == pos;
-    })
-
-    return uniqueArray.map(a => ({ label: a })).filter((items) => items.label.toLowerCase().startsWith(inputStr));
   }
 
-  renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
-    el.setText(suggestion.label);
+  private defaultSuggestions(inputStr: string): Array<string> {
+    const languages = this.plugin.settings.languages;
+
+    const translatedSuggestions = languages.flatMap(l => [
+      translate("Today", l),
+      translate("Yesterday", l),
+      translate("Tomorrow", l)
+    ]);
+
+    const uniqueArray = translatedSuggestions.filter(function(item, pos) {
+      return translatedSuggestions.indexOf(item) == pos;
+    })
+
+    return uniqueArray.filter(item => item.toLowerCase().startsWith(inputStr));
+  }
+
+  renderSuggestion(suggestion: string, el: HTMLElement): void {
+    el.setText(suggestion);
   }
 
   selectSuggestion(
-    suggestion: IDateCompletion,
+    suggestion: string,
     event: KeyboardEvent | MouseEvent
   ): void {
     const includeAlias = event.shiftKey;
@@ -118,10 +121,10 @@ export default class DateSuggest extends CodeMirrorSuggest<IDateCompletion> {
     const head = this.getStartPos();
     const anchor = this.cmEditor.getCursor();
 
-    let dateStr = this.plugin.parseDate(suggestion.label).formattedString;
+    let dateStr = this.plugin.parseDate(suggestion).formattedString;
     if (this.plugin.settings.autosuggestToggleLink) {
       if (includeAlias) {
-        dateStr = `[[${dateStr}|${suggestion.label}]]`;
+        dateStr = `[[${dateStr}|${suggestion}]]`;
       } else {
         dateStr = `[[${dateStr}]]`;
       }
