@@ -39,13 +39,13 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     });
   }
 
-  getSuggestions(inputStr: string): Array<string> {
+  getSuggestions(inputStr: string): string[] {
     // handle no matches
     const suggestions = this.getDateSuggestions(inputStr);
     return suggestions.length ? suggestions : [ inputStr ];
   }
 
-  getDateSuggestions(inputStr: string): Array<string> {
+  getDateSuggestions(inputStr: string): string[] {
     if (inputStr.match(/(next|last|this)/i)) {
       return this.getImmediateSuggestions(inputStr);
     }
@@ -57,7 +57,7 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     return this.defaultSuggestions(inputStr);
   }
 
-  private getImmediateSuggestions(inputStr: string): Array<string> {
+  private getImmediateSuggestions(inputStr: string): string[] {
     const reference = inputStr.match(/(next|last|this)/i)[1];
     return [
       "week",
@@ -75,7 +75,7 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
       .filter(items => items.toLowerCase().startsWith(inputStr));
   }
 
-  private getRelativeSuggestions(inputStr: string): Array<string> {
+  private getRelativeSuggestions(inputStr: string): string[] {
     const relativeDate = inputStr.match(/^(in )?([+-]?\d+)/i);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
@@ -92,7 +92,7 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     }
   }
 
-  private defaultSuggestions(inputStr: string): Array<string> {
+  private defaultSuggestions(inputStr: string): string[] {
     const languages = this.plugin.settings.languages;
 
     const translatedSuggestions = languages.flatMap(l => [

@@ -10,7 +10,7 @@ export interface NLDSettings {
   timeFormat: string;
   separator: string;
   weekStart: string;
-  languages: Array<string>;
+  languages: string[];
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
@@ -41,7 +41,7 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  parseStringToArray(string: string): Array<string> {
+  parseStringToArray(string: string): string[] {
     return string.split(',');
   }
 
