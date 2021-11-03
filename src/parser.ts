@@ -16,7 +16,6 @@ export default class NLDParser {
   chronos: Chrono[];
 
   constructor(language: string[]) {
-    console.log("parser initialized again");
     this.chronos = getChronos(language);
   }
 
