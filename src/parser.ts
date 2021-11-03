@@ -1,5 +1,6 @@
-import chrono, { Chrono } from "chrono-node";
+import {Chrono, ParsedResult, ParsingOption} from "chrono-node";
 import type { Moment } from "moment";
+import getChronos from "./chrono";
 
 export interface NLDResult {
   formattedString: string;
@@ -11,23 +12,39 @@ const getLastDayOfMonth = function (y: number, m: number) {
   return new Date(y, m, 0).getDate();
 };
 
-function getLocalizedChrono(language: string): Chrono {
-  const locale = window.moment.locale();
-  const gb = locale === "en-gb";
-
-  return new Chrono(chrono[language].createCasualConfiguration(gb))
-}
-
 export default class NLDParser {
-  chrono: Chrono;
+  chronos: Chrono[];
 
-  constructor(language: string) {
-    this.chrono = getLocalizedChrono(language);
+  constructor(language: string[]) {
+    console.log("parser initialized again");
+    this.chronos = getChronos(language);
+  }
+
+  getParsedDateResult(text: string, referenceDate?: Date, option?: ParsingOption): Date {
+    let result: Date;
+    this.chronos.forEach(c => {
+      const parsedDate = c.parseDate(text, referenceDate, option);
+      if (parsedDate) {
+        result = parsedDate;
+        return;
+      }
+    });
+    return result;
+  }
+
+  getParsedResult(text: string): ParsedResult[] {
+    let result: ParsedResult[];
+    this.chronos.forEach(c => {
+      const parsedResult = c.parse(text);
+      if (parsedResult) {
+        result = parsedResult;
+        return;
+      }
+    });
+    return result;
   }
 
   getParsedDate(selectedText: string, weekStart: string): Date {
-    const parser = this.chrono;
-
     const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
     const lastDayOfMatch = selectedText.match(
       /(last day of|end of)\s*([^\n\r]*)/i
@@ -35,46 +52,46 @@ export default class NLDParser {
     const midOf = selectedText.match(/mid\s([\w]+)/i);
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return parser.parseDate(`next ${weekStart}`, new Date(), {
+      return this.getParsedDateResult(`next ${weekStart}`, new Date(),{
         forwardDate: true,
       });
     }
 
     if (nextDateMatch && nextDateMatch[1] === "month") {
-      const thisMonth = parser.parseDate("this month", new Date(), {
+      const thisMonth = this.getParsedDateResult("this month", new Date(),{
         forwardDate: true,
       });
-      return parser.parseDate(selectedText, thisMonth, {
+      return this.getParsedDateResult(selectedText, thisMonth, {
         forwardDate: true,
       });
     }
 
     if (nextDateMatch && nextDateMatch[1] === "year") {
-      const thisYear = parser.parseDate("this year", new Date(), {
+      const thisYear = this.getParsedDateResult("this year", new Date(), {
         forwardDate: true,
       });
-      return parser.parseDate(selectedText, thisYear, {
+      return this.getParsedDateResult(selectedText, thisYear, {
         forwardDate: true,
       });
     }
 
     if (lastDayOfMatch) {
-      const tempDate = parser.parse(lastDayOfMatch[2]);
+      const tempDate = this.getParsedResult(lastDayOfMatch[2]);
       const year = tempDate[0].start.get("year");
       const month = tempDate[0].start.get("month");
       const lastDay = getLastDayOfMonth(year, month);
 
-      return parser.parseDate(`${year}-${month}-${lastDay}`, new Date(), {
+      return this.getParsedDateResult(`${year}-${month}-${lastDay}`, new Date(), {
         forwardDate: true,
       });
     }
 
     if (midOf) {
-      return parser.parseDate(`${midOf[1]} 15th`, new Date(), {
+      return this.getParsedDateResult(`${midOf[1]} 15th`, new Date(), {
         forwardDate: true,
       });
     }
 
-    return parser.parseDate(selectedText, new Date());
+    return this.getParsedDateResult(selectedText);
   }
 }

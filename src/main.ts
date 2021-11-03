@@ -104,7 +104,7 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   async resetParser(): Promise<void> {
-    this.parser = new NLDParser(this.settings.language);
+    this.parser = new NLDParser(this.settings.languages);
   }
 
   onunload(): void {

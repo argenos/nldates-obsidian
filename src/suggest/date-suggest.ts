@@ -1,7 +1,7 @@
 import { App } from "obsidian";
 import type NaturalLanguageDates from "src/main";
 import CodeMirrorSuggest from "./codemirror-suggest";
-import {translate} from "../locales/languages";
+import t from "../lang/helper";
 
 export default class DateSuggest extends CodeMirrorSuggest<string> {
   plugin: NaturalLanguageDates;
@@ -96,9 +96,9 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     const languages = this.plugin.settings.languages;
 
     const translatedSuggestions = languages.flatMap(l => [
-      translate("Today", l),
-      translate("Yesterday", l),
-      translate("Tomorrow", l)
+      t("today", l),
+      t("yesterday", l),
+      t("tomorrow", l)
     ]);
 
     const uniqueArray = translatedSuggestions.filter(function(item, pos) {
