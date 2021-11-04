@@ -12,6 +12,13 @@ export interface NLDSettings {
   weekStart: string;
   languages: string[];
 
+  english: boolean;
+  japanese: boolean;
+  french: boolean;
+  german: boolean;
+  portuguese: boolean;
+  dutch: boolean;
+
   modalToggleTime: boolean;
   modalToggleLink: boolean;
   modalMomentFormat: string;
@@ -28,6 +35,13 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   weekStart: "Monday",
   languages: ["en"],
 
+  english: true,
+  japanese: false,
+  french: false,
+  german: false,
+  portuguese: false,
+  dutch: false,
+
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
@@ -41,8 +55,27 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  parseStringToArray(string: string): string[] {
-    return string.split(',');
+  createLanguageSetting(containerEl: HTMLElement, text: string, code: string) : Setting {
+    return new Setting(containerEl)
+      .setName(text)
+      .setDesc(`Whether to parse ${text} or not`)
+      .addToggle(l =>
+        l
+          .setValue(this.plugin.settings[text.toLowerCase()])
+          .onChange(async (v) => {
+            this.plugin.settings[text.toLowerCase()] = v;
+            this.editLanguages(code, v);
+            await this.plugin.saveSettings();
+            await this.plugin.resetParser();
+          }));
+  }
+
+  editLanguages(code: string, enabled: boolean): void {
+    if (enabled) {
+      this.plugin.settings.languages.push(code);
+    } else {
+      this.plugin.settings.languages.remove(code);
+    }
   }
 
   display(): void {
@@ -85,18 +118,16 @@ export class NLDSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl)
-      .setName("Language")
-      .setDesc("Language to parse")
-      .addText((language) =>
-        language
-            .setValue(this.plugin.settings.languages.join(','))
-            .onChange(async (value) => {
-              this.plugin.settings.languages = this.parseStringToArray(value);
-              await this.plugin.resetParser();
-              await this.plugin.saveSettings();
-            })
-        );
+    containerEl.createEl("h3", {
+      text: "Language settings",
+    });
+
+    this.createLanguageSetting(containerEl, "English", "en");
+    this.createLanguageSetting(containerEl, "Japanese", "ja");
+    this.createLanguageSetting(containerEl, "French", "fr");
+    this.createLanguageSetting(containerEl, "German", "de");
+    this.createLanguageSetting(containerEl, "Portuguese", "pt");
+    this.createLanguageSetting(containerEl, "Dutch", "nl");
 
     containerEl.createEl("h3", {
       text: "Hotkey formatting settings",

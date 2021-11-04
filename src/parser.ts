@@ -15,8 +15,8 @@ const getLastDayOfMonth = function (y: number, m: number) {
 export default class NLDParser {
   chronos: Chrono[];
 
-  constructor(language: string[]) {
-    this.chronos = getChronos(language);
+  constructor(languages: string[]) {
+    this.chronos = getChronos(languages);
   }
 
   getParsedDateResult(text: string, referenceDate?: Date, option?: ParsingOption): Date {
