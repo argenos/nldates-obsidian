@@ -7,7 +7,7 @@ import pt from './pt';
 import de from './de';
 import nl from './nl';
 
-export default function t(key: string, lang: string): string {
+export default function t(key: string, lang: string, variables?: Record<string, string>): string {
   const languages = {
     en: i18n.create({ values: en }),
     ja: i18n.create({ values: ja }),
@@ -16,5 +16,5 @@ export default function t(key: string, lang: string): string {
     de: i18n.create({ values: de }),
     nl: i18n.create({ values: nl }),
   };
-  return languages[lang](key) || languages["en"](key)
+  return languages[lang](key, variables) || languages["en"](key, variables)
 }

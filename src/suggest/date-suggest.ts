@@ -87,16 +87,16 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     const regexp = new RegExp(`^(${t("in", lang)} )?([+-]?\\d+)`, "i")
     const relativeDate = inputStr.match(regexp);
     if (relativeDate) {
-      const timeDelta = relativeDate[1];
+      const timeDelta = relativeDate[relativeDate.length - 1];
       return [
-        `in ${timeDelta} minutes`,
-        `in ${timeDelta} hours`,
-        `in ${timeDelta} days`,
-        `in ${timeDelta} weeks`,
-        `in ${timeDelta} months`,
-        `${timeDelta} days ago`,
-        `${timeDelta} weeks ago`,
-        `${timeDelta} months ago`,
+        t("inminutes", lang, { timeDelta }),
+        t("inhours", lang, { timeDelta }),
+        t("indays", lang, { timeDelta }),
+        t("inweeks", lang, { timeDelta }),
+        t("inmonths", lang, { timeDelta }),
+        t("daysago", lang, { timeDelta }),
+        t("weeksago", lang, { timeDelta }),
+        t("monthsago", lang, { timeDelta }),
       ].filter(items => items.toLowerCase().startsWith(inputStr));
     }
   }

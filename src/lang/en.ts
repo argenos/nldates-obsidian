@@ -16,6 +16,14 @@ const dict = {
   thursday: "Thursday",
   friday: "Friday",
   saturday: "Saturday",
+  inminutes: "in %{timeDelta} minutes",
+  inhours: "in %{timeDelta} hours",
+  indays: "in %{timeDelta} days",
+  inweeks: "in %{timeDelta} weeks",
+  inmonths: "in %{timeDelta} months",
+  daysago: "%{timeDelta} days ago",
+  weeksago: "%{timeDelta} weeks ago",
+  monthsago: "%{timeDelta} months ago",
 } as const;
 
 export default dict;
