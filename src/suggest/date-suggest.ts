@@ -46,37 +46,46 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
   }
 
   getDateSuggestions(inputStr: string): string[] {
-    if (inputStr.match(/(next|last|this)/i)) {
-      return this.getImmediateSuggestions(inputStr);
-    }
+    return this.plugin.settings.languages.flatMap(
+      language => {
+        let suggestions = this.getImmediateSuggestions(inputStr, language);
+        if (suggestions)
+          return suggestions
 
-    if (inputStr.match(/^(in )?([+-]?\d+)/i)) {
-      return this.getRelativeSuggestions(inputStr);
-    }
+        suggestions = this.getRelativeSuggestions(inputStr, language);
+        if (suggestions)
+          return suggestions;
 
-    return this.defaultSuggestions(inputStr);
+        return this.defaultSuggestions(inputStr, language);
+      }
+    );
   }
 
-  private getImmediateSuggestions(inputStr: string): string[] {
-    const reference = inputStr.match(/(next|last|this)/i)[1];
-    return [
-      "week",
-      "month",
-      "year",
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ]
-      .map(val => `${reference} ${val}`)
-      .filter(items => items.toLowerCase().startsWith(inputStr));
+  private getImmediateSuggestions(inputStr: string, lang: string): string[] {
+    const regexp = new RegExp(`(${t("next", lang)}|${t("last", lang)}|${t("this", lang)})`, "i")
+    const match = inputStr.match(regexp)
+    if (match) {
+      const reference = match[1]
+      return [
+        t("week", lang),
+        t("month", lang),
+        t("year", lang),
+        t("sunday", lang),
+        t("monday", lang),
+        t("tuesday", lang),
+        t("wednesday", lang),
+        t("thursday", lang),
+        t("friday", lang),
+        t("saturday", lang),
+      ]
+        .map(val => `${reference} ${val}`)
+        .filter(items => items.toLowerCase().startsWith(inputStr));
+    }
   }
 
-  private getRelativeSuggestions(inputStr: string): string[] {
-    const relativeDate = inputStr.match(/^(in )?([+-]?\d+)/i);
+  private getRelativeSuggestions(inputStr: string, lang: string): string[] {
+    const regexp = new RegExp(`^(${t("in", lang)} )?([+-]?\\d+)`, "i")
+    const relativeDate = inputStr.match(regexp);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
       return [
@@ -92,20 +101,14 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
     }
   }
 
-  private defaultSuggestions(inputStr: string): string[] {
-    const languages = this.plugin.settings.languages;
+  private defaultSuggestions(inputStr: string, lang: string): string[] {
+    const suggestions = [
+      t("today", lang),
+      t("yesterday", lang),
+      t("tomorrow", lang),
+    ];
 
-    const translatedSuggestions = languages.flatMap(l => [
-      t("today", l),
-      t("yesterday", l),
-      t("tomorrow", l)
-    ]);
-
-    const uniqueArray = translatedSuggestions.filter(function(item, pos) {
-      return translatedSuggestions.indexOf(item) == pos;
-    })
-
-    return uniqueArray.filter(item => item.toLowerCase().startsWith(inputStr));
+    return suggestions.filter(item => item.toLowerCase().startsWith(inputStr));
   }
 
   renderSuggestion(suggestion: string, el: HTMLElement): void {
