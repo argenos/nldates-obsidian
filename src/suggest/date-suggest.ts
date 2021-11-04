@@ -137,13 +137,11 @@ export default class DateSuggest extends EditorSuggest<string> {
   }
 
   private defaultSuggestions(inputStr: string, lang: string): string[] {
-    const suggestions = [
+    return [
       t("today", lang),
       t("yesterday", lang),
       t("tomorrow", lang),
-    ];
-
-    return suggestions.filter(item => item.toLowerCase().startsWith(inputStr));
+    ].filter(item => item.toLowerCase().startsWith(inputStr));
   }
 
   renderSuggestion(suggestion: string, el: HTMLElement): void {
