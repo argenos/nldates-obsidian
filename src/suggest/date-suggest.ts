@@ -1,14 +1,32 @@
-import { App } from "obsidian";
+import {
+  App,
+  Editor,
+  EditorPosition,
+  EditorSuggest,
+  EditorSuggestContext,
+  EditorSuggestTriggerInfo,
+  MarkdownView,
+  TFile,
+} from "obsidian";
 import type NaturalLanguageDates from "src/main";
-import CodeMirrorSuggest from "./codemirror-suggest";
 import t from "../lang/helper";
 
-export default class DateSuggest extends CodeMirrorSuggest<string> {
-  plugin: NaturalLanguageDates;
-  constructor(app: App, plugin: NaturalLanguageDates) {
-    super(app, plugin.settings.autocompleteTriggerPhrase);
-    this.plugin = plugin;
 
+
+export default class DateSuggest extends EditorSuggest<string> {
+  plugin: NaturalLanguageDates;
+  app: App;
+
+  protected cmEditor: Editor;
+
+  private startPos: CodeMirror.Position;
+  private triggerPhrase: string;
+
+  constructor(app: App, plugin: NaturalLanguageDates) {
+    super(app);
+    this.app = app;
+    this.plugin = plugin;
+    this.triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
     this.updateInstructions();
   }
 
@@ -24,28 +42,34 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
       return;
     }
 
-    this.setInstructions((containerEl) => {
-      containerEl.createDiv("prompt-instructions", (instructions) => {
-        instructions.createDiv("prompt-instruction", (instruction) => {
-          instruction.createSpan({
-            cls: "prompt-instruction-command",
-            text: "Shift",
-          });
-          instruction.createSpan({
-            text: "Keep text as alias",
-          });
-        });
-      });
-    });
+    // this.setInstructions((containerEl) => {
+    //   containerEl.createDiv("prompt-instructions", (instructions) => {
+    //     instructions.createDiv("prompt-instruction", (instruction) => {
+    //       instruction.createSpan({
+    //         cls: "prompt-instruction-command",
+    //         text: "Shift",
+    //       });
+    //       instruction.createSpan({
+    //         text: "Keep text as alias",
+    //       });
+    //     });
+    //   });
+    // });
   }
 
-  getSuggestions(inputStr: string): string[] {
+  getSuggestions(context: EditorSuggestContext): string[] {
     // handle no matches
-    const suggestions = this.getDateSuggestions(inputStr);
-    return suggestions.length ? suggestions : [ inputStr ];
+    const suggestions = this.getDateSuggestions(context.query);
+    return suggestions.length ? suggestions : [ context.query ];
   }
 
   getDateSuggestions(inputStr: string): string[] {
+    if (inputStr.match(/^time/)) {
+      return ["now", "+15 minutes", "+1 hour", "-15 minutes", "-1 hour"]
+        .map(val => `time:${val}`)
+        .filter(item => item.toLowerCase().startsWith(inputStr));
+    }
+
     return this.plugin.settings.languages.flatMap(
       language => {
         let suggestions = this.getImmediateSuggestions(inputStr, language);
@@ -121,11 +145,27 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
   ): void {
     const includeAlias = event.shiftKey;
 
-    const head = this.getStartPos();
-    const anchor = this.cmEditor.getCursor();
+    const { workspace } = this.app;
+    const activeView = workspace.getActiveViewOfType(MarkdownView);
 
-    let dateStr = this.plugin.parseDate(suggestion).formattedString;
-    if (this.plugin.settings.autosuggestToggleLink) {
+    if (!activeView) {
+      return;
+    }
+    const editor = activeView.editor;
+    const head = this.startPos;
+    const anchor = editor.getCursor();
+    let dateStr = "";
+    let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
+
+    if (suggestion.startsWith("time:")) {
+      const timePart = suggestion.substring(5);
+      dateStr = this.plugin.parseTime(timePart).formattedString;
+      makeIntoLink = false;
+    } else {
+      dateStr = this.plugin.parseDate(suggestion).formattedString;
+    }
+
+    if (makeIntoLink) {
       if (includeAlias) {
         dateStr = `[[${dateStr}|${suggestion}]]`;
       } else {
@@ -133,7 +173,48 @@ export default class DateSuggest extends CodeMirrorSuggest<string> {
       }
     }
 
-    this.cmEditor.replaceRange(dateStr, head, anchor);
+    editor.replaceRange(dateStr, head, anchor);
     this.close();
+  }
+
+  onTrigger(
+    cursor: EditorPosition,
+    editor: Editor,
+    file: TFile
+  ): EditorSuggestTriggerInfo {
+    const lineContents = editor.getLine(cursor.line);
+
+    const match = lineContents
+      .substring(0, cursor.ch)
+      .match(/(?:^|\s|\W)(@[^@]*$)/);
+
+    if (match === null) {
+      return null;
+    }
+
+    const triggerInfo = this.getTriggerInfo(match, cursor);
+
+    this.startPos = triggerInfo.start;
+    this.cmEditor = editor;
+
+    return triggerInfo;
+  }
+
+  protected getTriggerInfo(
+    match: RegExpMatchArray,
+    cursor: EditorPosition
+  ): EditorSuggestTriggerInfo {
+    return {
+      start: this.getStartPos(match, cursor.line),
+      end: cursor,
+      query: match[1].substring(this.triggerPhrase.length),
+    };
+  }
+
+  protected getStartPos(match: RegExpMatchArray, line: number): EditorPosition {
+    return {
+      line: line,
+      ch: match.index + match[0].length - match[1].length,
+    };
   }
 }
