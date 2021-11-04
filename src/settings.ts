@@ -55,10 +55,11 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  createLanguageSetting(containerEl: HTMLElement, text: string, code: string) : Setting {
+  createLanguageSetting(containerEl: HTMLElement, text: string, code: string, note?: string) : Setting {
+    note = note ? ` (${note})` : "";
     return new Setting(containerEl)
       .setName(text)
-      .setDesc(`Whether to parse ${text} or not`)
+      .setDesc(`Whether to parse ${text} or not` + note)
       .addToggle(l =>
         l
           .setValue(this.plugin.settings[text.toLowerCase()])
@@ -125,9 +126,9 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.createLanguageSetting(containerEl, "English", "en");
     this.createLanguageSetting(containerEl, "Japanese", "ja");
     this.createLanguageSetting(containerEl, "French", "fr");
-    this.createLanguageSetting(containerEl, "German", "de");
-    this.createLanguageSetting(containerEl, "Portuguese", "pt");
-    this.createLanguageSetting(containerEl, "Dutch", "nl");
+    this.createLanguageSetting(containerEl, "German", "de", "partially supported");
+    this.createLanguageSetting(containerEl, "Portuguese", "pt", "partially supported");
+    this.createLanguageSetting(containerEl, "Dutch", "nl", "under development");
 
     containerEl.createEl("h3", {
       text: "Hotkey formatting settings",
