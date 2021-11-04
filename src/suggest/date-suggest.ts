@@ -64,17 +64,14 @@ export default class DateSuggest extends EditorSuggest<string> {
   }
 
   getDateSuggestions(inputStr: string): string[] {
-    if (inputStr.match(/^time/)) {
-      return ["now", "+15 minutes", "+1 hour", "-15 minutes", "-1 hour"]
-        .map(val => `time:${val}`)
-        .filter(item => item.toLowerCase().startsWith(inputStr));
-    }
-
-    return this.plugin.settings.languages.flatMap(
+    return this.unique(this.plugin.settings.languages.flatMap(
       language => {
-        let suggestions = this.getImmediateSuggestions(inputStr, language);
+        let suggestions = this.getTimeSuggestions(inputStr, language);
         if (suggestions)
-          return suggestions
+          return suggestions;
+        suggestions = this.getImmediateSuggestions(inputStr, language);
+        if (suggestions)
+          return suggestions;
 
         suggestions = this.getRelativeSuggestions(inputStr, language);
         if (suggestions)
@@ -82,7 +79,21 @@ export default class DateSuggest extends EditorSuggest<string> {
 
         return this.defaultSuggestions(inputStr, language);
       }
-    );
+    ));
+  }
+
+  private getTimeSuggestions(inputStr: string, lang: string): string[] {
+    if (inputStr.match(new RegExp(`^${t("time", lang)}`))) {
+      return [
+        t("now", lang),
+        t("plusminutes", lang, { timeDelta: "15" }),
+        t("plushour", lang, { timeDelta: "1" }),
+        t("minusminutes", lang, { timeDelta: "15" }),
+        t("minushour", lang, { timeDelta: "1" }),
+      ]
+        .map(val => `${t("time", lang)}:${val}`)
+        .filter(item => item.toLowerCase().startsWith(inputStr));
+    }
   }
 
   private getImmediateSuggestions(inputStr: string, lang: string): string[] {
@@ -157,7 +168,7 @@ export default class DateSuggest extends EditorSuggest<string> {
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
-    if (suggestion.startsWith("time:")) {
+    if (this.suggestionIsTime(suggestion)) {
       const timePart = suggestion.substring(5);
       dateStr = this.plugin.parseTime(timePart).formattedString;
       makeIntoLink = false;
@@ -216,5 +227,15 @@ export default class DateSuggest extends EditorSuggest<string> {
       line: line,
       ch: match.index + match[0].length - match[1].length,
     };
+  }
+
+  protected suggestionIsTime(suggestion: string): boolean {
+    return this.plugin.settings.languages.some(lang => suggestion.startsWith(t("time", lang)))
+  }
+
+  protected unique(suggestions: string[]) : string[] {
+    return suggestions.filter(function(item, pos) {
+      return suggestions.indexOf(item) == pos;
+    })
   }
 }

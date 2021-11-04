@@ -7,6 +7,8 @@ import pt from './pt';
 import de from './de';
 import nl from './nl';
 
+const notFoundDefault = "NOTFOUND" as const;
+
 export default function t(key: string, lang: string, variables?: Record<string, string>): string {
   const languages = {
     en: i18n.create({ values: en }),
@@ -16,5 +18,6 @@ export default function t(key: string, lang: string, variables?: Record<string, 
     de: i18n.create({ values: de }),
     nl: i18n.create({ values: nl }),
   };
-  return languages[lang](key, variables) || languages["en"](key, variables)
+  const translation = languages[lang](key, notFoundDefault, variables);
+  return translation === notFoundDefault ? languages["en"](key, variables) : translation;
 }

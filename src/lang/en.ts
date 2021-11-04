@@ -24,6 +24,12 @@ const dict = {
   daysago: "%{timeDelta} days ago",
   weeksago: "%{timeDelta} weeks ago",
   monthsago: "%{timeDelta} months ago",
+  time: "time",
+  now: "now",
+  plusminutes: "+%{timeDelta} minutes",
+  minusminutes: "-%{timeDelta} minutes",
+  plushour: "+%{timeDelta} hour",
+  minushour: "-%{timeDelta} hour",
 } as const;
 
 export default dict;
