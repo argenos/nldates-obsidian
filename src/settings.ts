@@ -55,30 +55,6 @@ export class NLDSettingsTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
-  createLanguageSetting(containerEl: HTMLElement, text: string, code: string, note?: string) : Setting {
-    note = note ? ` (${note})` : "";
-    return new Setting(containerEl)
-      .setName(text)
-      .setDesc(`Whether to parse ${text} or not` + note)
-      .addToggle(l =>
-        l
-          .setValue(this.plugin.settings[text.toLowerCase()])
-          .onChange(async (v) => {
-            this.plugin.settings[text.toLowerCase()] = v;
-            this.editLanguages(code, v);
-            await this.plugin.saveSettings();
-            await this.plugin.resetParser();
-          }));
-  }
-
-  editLanguages(code: string, enabled: boolean): void {
-    if (enabled) {
-      this.plugin.settings.languages.push(code);
-    } else {
-      this.plugin.settings.languages.remove(code);
-    }
-  }
-
   display(): void {
     const { containerEl } = this;
 
@@ -204,5 +180,29 @@ export class NLDSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+  }
+
+  protected createLanguageSetting(containerEl: HTMLElement, text: string, code: string, note?: string) : Setting {
+    note = note ? ` (${note})` : "";
+    return new Setting(containerEl)
+      .setName(text)
+      .setDesc(`Whether to parse ${text} or not` + note)
+      .addToggle(l =>
+        l
+          .setValue(this.plugin.settings[text.toLowerCase()])
+          .onChange(async (v) => {
+            this.plugin.settings[text.toLowerCase()] = v;
+            this.editLanguages(code, v);
+            await this.plugin.saveSettings();
+            await this.plugin.resetParser();
+          }));
+  }
+
+  protected editLanguages(code: string, enabled: boolean): void {
+    if (enabled) {
+      this.plugin.settings.languages.push(code);
+    } else {
+      this.plugin.settings.languages.remove(code);
+    }
   }
 }
