@@ -21,7 +21,7 @@ import {
   getCurrentTimeCommand,
   getNowCommand,
 } from "./commands";
-import { getMoment, getFormattedDate } from "./utils";
+import { getFormattedDate } from "./utils";
 
 export default class NaturalLanguageDates extends Plugin {
   private parser: NLDParser;
@@ -135,7 +135,7 @@ export default class NaturalLanguageDates extends Plugin {
     return {
       formattedString,
       date,
-      moment: getMoment(date),
+      moment: window.moment(date),
     };
   }
 

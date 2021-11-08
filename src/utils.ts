@@ -62,10 +62,6 @@ export function adjustCursor(
   });
 }
 
-export function getMoment(date: Date): Moment {
-  return window.moment(date);
-}
-
 export function getFormattedDate(date: Date, format: string): string {
-  return getMoment(date).format(format);
+  return window.moment(date).format(format);
 }

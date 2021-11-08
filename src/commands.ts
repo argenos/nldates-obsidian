@@ -1,5 +1,5 @@
 import { MarkdownView, Editor, EditorPosition } from "obsidian";
-import { adjustCursor, getSelectedText, getMoment } from "./utils";
+import { adjustCursor, getSelectedText } from "./utils";
 import NaturalLanguageDates from "./main";
 
 export function getParseCommand(
@@ -58,7 +58,7 @@ export function insertMomentCommand(
   if (activeView) {
     // The active view might not be a markdown view
     const editor = activeView.editor;
-    editor.replaceSelection(getMoment(date).format(format));
+    editor.replaceSelection(window.moment(date).format(format));
   }
 }
 
