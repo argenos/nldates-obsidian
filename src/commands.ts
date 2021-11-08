@@ -9,39 +9,42 @@ export function getParseCommand(
   const { workspace } = plugin.app;
   const activeView = workspace.getActiveViewOfType(MarkdownView);
 
-  if (activeView) {
-    // The active view might not be a markdown view
-    const editor = activeView.editor;
-    const cursor = editor.getCursor();
-    const selectedText = getSelectedText(editor);
-
-    let date = plugin.parseDate(selectedText);
-
-    if (!date.moment.isValid()) {
-      // Do nothing
-      editor.setCursor({
-        line: cursor.line,
-        ch: cursor.ch,
-      });
-    } else {
-      //mode == "replace"
-      let newStr = `[[${date.formattedString}]]`;
-
-      if (mode == "link") {
-        newStr = `[${selectedText}](${date.formattedString})`;
-      } else if (mode == "clean") {
-        newStr = `${date.formattedString}`;
-      } else if (mode == "time") {
-        let time = plugin.parseTime(selectedText);
-
-        newStr = `${time.formattedString}`;
-      }
-
-      editor.replaceSelection(newStr);
-      adjustCursor(editor, cursor, newStr, selectedText);
-      editor.focus();
-    }
+  // The active view might not be a markdown view
+  if (!activeView) {
+    return;
   }
+
+  const editor = activeView.editor;
+  const cursor = editor.getCursor();
+  const selectedText = getSelectedText(editor);
+
+  let date = plugin.parseDate(selectedText);
+
+  if (!date.moment.isValid()) {
+    // Do nothing
+    editor.setCursor({
+      line: cursor.line,
+      ch: cursor.ch,
+    });
+    return;
+  }
+
+  //mode == "replace"
+  let newStr = `[[${date.formattedString}]]`;
+
+  if (mode == "link") {
+    newStr = `[${selectedText}](${date.formattedString})`;
+  } else if (mode == "clean") {
+    newStr = `${date.formattedString}`;
+  } else if (mode == "time") {
+    let time = plugin.parseTime(selectedText);
+
+    newStr = `${time.formattedString}`;
+  }
+
+  editor.replaceSelection(newStr);
+  adjustCursor(editor, cursor, newStr, selectedText);
+  editor.focus();
 }
 
 export function insertMomentCommand(
