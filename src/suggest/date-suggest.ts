@@ -9,18 +9,15 @@ import {
   TFile,
 } from "obsidian";
 import type NaturalLanguageDates from "src/main";
+import { generateMarkdownLink } from "src/utils";
 
 interface IDateCompletion {
   label: string;
 }
 
 export default class DateSuggest extends EditorSuggest<IDateCompletion> {
-  plugin: NaturalLanguageDates;
-  app: App;
-
-  protected cmEditor: Editor;
-
-  private startPos: CodeMirror.Position;
+  private plugin: NaturalLanguageDates;
+  private app: App;
   private triggerPhrase: string;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
@@ -28,54 +25,37 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     this.app = app;
     this.plugin = plugin;
     this.triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
-    this.updateInstructions();
-  }
 
-  open(): void {
-    super.open();
-    // update the instructions since they are settings-dependent
-    this.updateInstructions();
-  }
+    // @ts-ignore
+    this.scope.register(["Shift"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-ignore
+      this.suggestions.useSelectedItem(evt);
+      return false;
+    });
 
-  protected updateInstructions(): void {
-    if (!this.plugin.settings.autosuggestToggleLink) {
-      // Instructions only apply for links
-      return;
+    if (this.plugin.settings.autosuggestToggleLink) {
+      this.setInstructions([{ command: "Shift", purpose: "Keep text as alias" }]);
     }
-
-    // this.setInstructions((containerEl) => {
-    //   containerEl.createDiv("prompt-instructions", (instructions) => {
-    //     instructions.createDiv("prompt-instruction", (instruction) => {
-    //       instruction.createSpan({
-    //         cls: "prompt-instruction-command",
-    //         text: "Shift",
-    //       });
-    //       instruction.createSpan({
-    //         text: "Keep text as alias",
-    //       });
-    //     });
-    //   });
-    // });
   }
 
   getSuggestions(context: EditorSuggestContext): IDateCompletion[] {
-    // handle no matches
-    const suggestions = this.getDateSuggestions(context.query);
+    const suggestions = this.getDateSuggestions(context);
     if (suggestions.length) {
       return suggestions;
-    } else {
-      return [{ label: context.query }];
     }
+
+    // catch-all if there are no matches
+    return [{ label: context.query }];
   }
 
-  getDateSuggestions(inputStr: string): IDateCompletion[] {
-    if (inputStr.match(/^time/)) {
+  getDateSuggestions(context: EditorSuggestContext): IDateCompletion[] {
+    if (context.query.match(/^time/)) {
       return ["now", "+15 minutes", "+1 hour", "-15 minutes", "-1 hour"]
         .map((val) => ({ label: `time:${val}` }))
-        .filter((item) => item.label.toLowerCase().startsWith(inputStr));
+        .filter((item) => item.label.toLowerCase().startsWith(context.query));
     }
-    if (inputStr.match(/(next|last|this)/i)) {
-      const reference = inputStr.match(/(next|last|this)/i)[1];
+    if (context.query.match(/(next|last|this)/i)) {
+      const reference = context.query.match(/(next|last|this)/i)[1];
       return [
         "week",
         "month",
@@ -89,11 +69,11 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
         "Saturday",
       ]
         .map((val) => ({ label: `${reference} ${val}` }))
-        .filter((items) => items.label.toLowerCase().startsWith(inputStr));
+        .filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
     const relativeDate =
-      inputStr.match(/^in ([+-]?\d+)/i) || inputStr.match(/^([+-]?\d+)/i);
+      context.query.match(/^in ([+-]?\d+)/i) || context.query.match(/^([+-]?\d+)/i);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
       return [
@@ -105,35 +85,27 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
         { label: `${timeDelta} days ago` },
         { label: `${timeDelta} weeks ago` },
         { label: `${timeDelta} months ago` },
-      ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
+      ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [
-      { label: "Today" },
-      { label: "Yesterday" },
-      { label: "Tomorrow" },
-    ].filter((items) => items.label.toLowerCase().startsWith(inputStr));
+    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
+      (items) => items.label.toLowerCase().startsWith(context.query)
+    );
   }
 
   renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
     el.setText(suggestion.label);
   }
 
-  selectSuggestion(
-    suggestion: IDateCompletion,
-    event: KeyboardEvent | MouseEvent
-  ): void {
-    const includeAlias = event.shiftKey;
-
-    const { workspace } = this.app;
-    const activeView = workspace.getActiveViewOfType(MarkdownView);
-
+  selectSuggestion(suggestion: IDateCompletion, event: KeyboardEvent | MouseEvent): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!activeView) {
       return;
     }
+
     const editor = activeView.editor;
-    const head = this.startPos;
-    const anchor = editor.getCursor();
+
+    const includeAlias = event.shiftKey;
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
@@ -146,15 +118,14 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     }
 
     if (makeIntoLink) {
-      if (includeAlias) {
-        dateStr = `[[${dateStr}|${suggestion.label}]]`;
-      } else {
-        dateStr = `[[${dateStr}]]`;
-      }
+      dateStr = generateMarkdownLink(
+        this.app,
+        dateStr,
+        includeAlias ? suggestion.label : undefined
+      );
     }
 
-    editor.replaceRange(dateStr, head, anchor);
-    this.close();
+    editor.replaceRange(dateStr, this.context.start, this.context.end);
   }
 
   onTrigger(
@@ -162,39 +133,35 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     editor: Editor,
     file: TFile
   ): EditorSuggestTriggerInfo {
-    const lineContents = editor.getLine(cursor.line);
-
-    const match = lineContents
-      .substring(0, cursor.ch)
-      .match(/(?:^|\s|\W)(@[^@]*$)/);
-
-    if (match === null) {
+    if (!this.plugin.settings.isAutosuggestEnabled) {
       return null;
     }
 
-    const triggerInfo = this.getTriggerInfo(match, cursor);
-
-    this.startPos = triggerInfo.start;
-    this.cmEditor = editor;
-
-    return triggerInfo;
-  }
-
-  protected getTriggerInfo(
-    match: RegExpMatchArray,
-    cursor: EditorPosition
-  ): EditorSuggestTriggerInfo {
-    return {
-      start: this.getStartPos(match, cursor.line),
-      end: cursor,
-      query: match[1].substring(this.triggerPhrase.length),
+    const startPos = this.context?.start || {
+      line: cursor.line,
+      ch: cursor.ch - this.triggerPhrase.length,
     };
-  }
 
-  protected getStartPos(match: RegExpMatchArray, line: number): EditorPosition {
+    if (!editor.getRange(startPos, cursor).startsWith(this.triggerPhrase)) {
+      return null;
+    }
+
+    const precedingChar = editor.getRange(
+      {
+        line: startPos.line,
+        ch: startPos.ch - 1,
+      },
+      startPos
+    );
+
+    if (precedingChar && /[`a-zA-Z0-9]/.test(precedingChar)) {
+      return null;
+    }
+
     return {
-      line: line,
-      ch: match.index + match[0].length - match[1].length,
+      start: startPos,
+      end: cursor,
+      query: editor.getRange(startPos, cursor).substring(1),
     };
   }
 }

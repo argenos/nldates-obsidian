@@ -1,5 +1,16 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import NaturalLanguageDates from "./main";
+import { getLocaleWeekStart } from "./utils";
+
+export type DayOfWeek =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "locale-default";
 
 export interface NLDSettings {
   autosuggestToggleLink: boolean;
@@ -9,7 +20,7 @@ export interface NLDSettings {
   format: string;
   timeFormat: string;
   separator: string;
-  weekStart: string;
+  weekStart: DayOfWeek;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
@@ -24,7 +35,7 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
   separator: " ",
-  weekStart: "Monday",
+  weekStart: "monday",
 
   modalToggleTime: false,
   modalToggleLink: false,
@@ -41,11 +52,12 @@ export class NLDSettingsTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+    const localeWeekStart = getLocaleWeekStart();
 
     containerEl.empty();
 
     containerEl.createEl("h2", {
-      text: "Nldates settings",
+      text: "Natural Language Dates",
     });
 
     containerEl.createEl("h3", {
@@ -70,10 +82,11 @@ export class NLDSettingsTab extends PluginSettingTab {
       .setDesc("Which day to consider as the start of the week")
       .addDropdown((day) =>
         day
-          .addOption("Monday", "Monday")
-          .addOption("Sunday", "Sunday")
+          .addOption("locale-default", `Locale default (${localeWeekStart})`)
+          .addOption("monday", "Monday")
+          .addOption("sunday", "Sunday")
           .setValue(this.plugin.settings.weekStart)
-          .onChange(async (value) => {
+          .onChange(async (value: DayOfWeek) => {
             this.plugin.settings.weekStart = value;
             await this.plugin.saveSettings();
           })
