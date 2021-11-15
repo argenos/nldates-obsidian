@@ -2,10 +2,7 @@ import { MarkdownView, Editor, EditorPosition } from "obsidian";
 import { adjustCursor, getSelectedText } from "./utils";
 import NaturalLanguageDates from "./main";
 
-export function getParseCommand(
-  plugin: NaturalLanguageDates,
-  mode: string
-): void {
+export function getParseCommand(plugin: NaturalLanguageDates, mode: string): void {
   const { workspace } = plugin.app;
   const activeView = workspace.getActiveViewOfType(MarkdownView);
 
@@ -78,12 +75,4 @@ export function getCurrentTimeCommand(plugin: NaturalLanguageDates): void {
   const format = plugin.settings.timeFormat;
   const date = new Date();
   insertMomentCommand(plugin, date, format);
-}
-
-export function insertDatePickerCommand(
-  dateString: string,
-  editor: Editor,
-  _cursor: EditorPosition
-): void {
-  editor.replaceSelection(dateString);
 }

@@ -1,9 +1,6 @@
 import { Moment } from "moment";
-import {
-  ObsidianProtocolData,
-  Plugin,
-  TFile,
-} from "obsidian";
+import { MarkdownView, ObsidianProtocolData, Plugin, TFile } from "obsidian";
+import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
 
 import {
   createDailyNote,
@@ -21,7 +18,7 @@ import {
   getCurrentTimeCommand,
   getNowCommand,
 } from "./commands";
-import { getFormattedDate } from "./utils";
+import { getFormattedDate, parseTruthy } from "./utils";
 
 export default class NaturalLanguageDates extends Plugin {
   private parser: NLDParser;
@@ -85,7 +82,7 @@ export default class NaturalLanguageDates extends Plugin {
       name: "Date picker",
       checkCallback: (checking: boolean) => {
         if (checking) {
-          return !!this.app.workspace.activeLeaf;
+          return !!this.app.workspace.getActiveViewOfType(MarkdownView);
         }
         new DatePickerModal(this.app, this).open();
       },
@@ -93,12 +90,7 @@ export default class NaturalLanguageDates extends Plugin {
     });
 
     this.addSettingTab(new NLDSettingsTab(this.app, this));
-
-    this.registerObsidianProtocolHandler(
-      "nldates",
-      this.actionHandler.bind(this)
-    );
-
+    this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
     this.registerEditorSuggest(new DateSuggest(this.app, this));
 
     this.app.workspace.onLayoutReady(() => {
@@ -112,7 +104,7 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
   async saveSettings(): Promise<void> {
@@ -120,10 +112,9 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   /*
-  @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
-  @param format: A string that contains the formatting string for a Moment
-  @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
-
+    @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
+    @param format: A string that contains the formatting string for a Moment
+    @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
   */
   parse(dateString: string, format: string): NLDResult {
     const date = this.parser.getParsedDate(dateString, this.settings.weekStart);
@@ -140,9 +131,8 @@ export default class NaturalLanguageDates extends Plugin {
   }
 
   /*
-  @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
-  @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
-
+    @param dateString: A string that contains a date in natural language, e.g. today, tomorrow, next week
+    @returns NLDResult: An object containing the date, a cloned Moment and the formatted string.
   */
   parseDate(dateString: string): NLDResult {
     return this.parse(dateString, this.settings.format);
@@ -152,15 +142,11 @@ export default class NaturalLanguageDates extends Plugin {
     return this.parse(dateString, this.settings.timeFormat);
   }
 
-  parseTruthy(flag: string): boolean {
-    return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
-  }
-
   async actionHandler(params: ObsidianProtocolData): Promise<void> {
     const { workspace } = this.app;
 
     const date = this.parseDate(params.day);
-    const newPane = this.parseTruthy(params.newPane || "yes");
+    const newPane = parseTruthy(params.newPane || "yes");
 
     if (date.moment.isValid()) {
       const dailyNote = await this.getDailyNote(date.moment);

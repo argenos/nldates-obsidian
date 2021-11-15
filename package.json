@@ -12,22 +12,22 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "15.1.0",
-    "@rollup/plugin-node-resolve": "9.0.0",
-    "@rollup/plugin-typescript": "6.0.0",
+    "@rollup/plugin-commonjs": "21.0.1",
+    "@rollup/plugin-node-resolve": "13.0.6",
+    "@rollup/plugin-typescript": "8.3.0",
     "@types/moment": "2.13.0",
-    "@types/node": "14.14.10",
-    "@typescript-eslint/eslint-plugin": "4.22.0",
-    "@typescript-eslint/parser": "4.22.0",
-    "eslint": "7.25.0",
-    "obsidian": "^0.12.17",
-    "prettier": "2.2.1",
-    "rollup": "^2.34.1",
-    "tslib": "^2.0.3",
-    "typescript": "^4.1.2"
+    "@types/node": "16.11.7",
+    "@typescript-eslint/eslint-plugin": "5.3.1",
+    "@typescript-eslint/parser": "5.3.1",
+    "eslint": "8.2.0",
+    "obsidian": "git+https://github.com/obsidianmd/obsidian-api.git#5687a75ecfdb78b6a832127cf6f9229e27e196a0",
+    "prettier": "2.4.1",
+    "rollup": "^2.60.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4"
   },
   "dependencies": {
     "chrono-node": "2.2.6",
-    "obsidian-daily-notes-interface": "0.9.2"
+    "obsidian-daily-notes-interface": "0.9.4"
   }
 }
