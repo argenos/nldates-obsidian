@@ -1,4 +1,4 @@
-import { MarkdownView, Editor, EditorPosition } from "obsidian";
+import { MarkdownView } from "obsidian";
 import { adjustCursor, getSelectedText } from "./utils";
 import NaturalLanguageDates from "./main";
 

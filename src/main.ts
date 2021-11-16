@@ -1,12 +1,4 @@
-import { Moment } from "moment";
-import { MarkdownView, ObsidianProtocolData, Plugin, TFile } from "obsidian";
-import { getDailyNoteSettings } from "obsidian-daily-notes-interface";
-
-import {
-  createDailyNote,
-  getAllDailyNotes,
-  getDailyNote,
-} from "obsidian-daily-notes-interface";
+import { MarkdownView, ObsidianProtocolData, Plugin } from "obsidian";
 
 import DatePickerModal from "./modals/date-picker";
 import NLDParser, { NLDResult } from "./parser";
@@ -18,7 +10,7 @@ import {
   getCurrentTimeCommand,
   getNowCommand,
 } from "./commands";
-import { getFormattedDate, parseTruthy } from "./utils";
+import { getFormattedDate, getOrCreateDailyNote, parseTruthy } from "./utils";
 
 export default class NaturalLanguageDates extends Plugin {
   private parser: NLDParser;
@@ -149,7 +141,7 @@ export default class NaturalLanguageDates extends Plugin {
     const newPane = parseTruthy(params.newPane || "yes");
 
     if (date.moment.isValid()) {
-      const dailyNote = await this.getDailyNote(date.moment);
+      const dailyNote = await getOrCreateDailyNote(date.moment);
 
       let leaf = workspace.activeLeaf;
       if (newPane) {
@@ -160,15 +152,5 @@ export default class NaturalLanguageDates extends Plugin {
 
       workspace.setActiveLeaf(leaf);
     }
-  }
-
-  async getDailyNote(date: Moment): Promise<TFile | null> {
-    // Borrowed from the Slated plugin:
-    // https://github.com/tgrosinger/slated-obsidian/blob/main/src/vault.ts#L17
-    const desiredNote = getDailyNote(date, getAllDailyNotes());
-    if (desiredNote) {
-      return Promise.resolve(desiredNote);
-    }
-    return createDailyNote(date);
   }
 }

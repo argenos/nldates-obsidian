@@ -1,4 +1,11 @@
-import { App, Editor, EditorRange, EditorPosition, normalizePath } from "obsidian";
+import { Moment } from "moment";
+import { App, Editor, EditorRange, EditorPosition, normalizePath, TFile } from "obsidian";
+import {
+  createDailyNote,
+  getAllDailyNotes,
+  getDailyNote,
+} from "obsidian-daily-notes-interface";
+
 import { DayOfWeek } from "./settings";
 
 export default function getWordBoundaries(editor: any): EditorRange {
@@ -97,4 +104,14 @@ export function generateMarkdownLink(app: App, subpath: string, alias?: string) 
       return `[[${path}]]`;
     }
   }
+}
+
+export async function getOrCreateDailyNote(date: Moment): Promise<TFile | null> {
+  // Borrowed from the Slated plugin:
+  // https://github.com/tgrosinger/slated-obsidian/blob/main/src/vault.ts#L17
+  const desiredNote = getDailyNote(date, getAllDailyNotes());
+  if (desiredNote) {
+    return Promise.resolve(desiredNote);
+  }
+  return createDailyNote(date);
 }
