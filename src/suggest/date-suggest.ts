@@ -18,13 +18,11 @@ interface IDateCompletion {
 export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   private plugin: NaturalLanguageDates;
   private app: App;
-  private triggerPhrase: string;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app);
     this.app = app;
     this.plugin = plugin;
-    this.triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
 
     // @ts-ignore
     this.scope.register(["Shift"], "Enter", (evt: KeyboardEvent) => {
@@ -103,8 +101,6 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       return;
     }
 
-    const editor = activeView.editor;
-
     const includeAlias = event.shiftKey;
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
@@ -125,7 +121,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       );
     }
 
-    editor.replaceRange(dateStr, this.context.start, this.context.end);
+    activeView.editor.replaceRange(dateStr, this.context.start, this.context.end);
   }
 
   onTrigger(
@@ -137,12 +133,13 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       return null;
     }
 
+    const triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
     const startPos = this.context?.start || {
       line: cursor.line,
-      ch: cursor.ch - this.triggerPhrase.length,
+      ch: cursor.ch - triggerPhrase.length,
     };
 
-    if (!editor.getRange(startPos, cursor).startsWith(this.triggerPhrase)) {
+    if (!editor.getRange(startPos, cursor).startsWith(triggerPhrase)) {
       return null;
     }
 
@@ -161,7 +158,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     return {
       start: startPos,
       end: cursor,
-      query: editor.getRange(startPos, cursor).substring(1),
+      query: editor.getRange(startPos, cursor).substring(triggerPhrase.length),
     };
   }
 }
