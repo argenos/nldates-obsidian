@@ -1,5 +1,16 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import NaturalLanguageDates from "./main";
+import { getLocaleWeekStart } from "./utils";
+
+export type DayOfWeek =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "locale-default";
 
 export interface NLDSettings {
   autosuggestToggleLink: boolean;
@@ -9,7 +20,7 @@ export interface NLDSettings {
   format: string;
   timeFormat: string;
   separator: string;
-  weekStart: string;
+  weekStart: DayOfWeek;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
@@ -24,12 +35,22 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
   separator: " ",
-  weekStart: "Monday",
+  weekStart: "locale-default",
 
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
 };
+
+const weekdays = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
 
 export class NLDSettingsTab extends PluginSettingTab {
   plugin: NaturalLanguageDates;
@@ -41,11 +62,13 @@ export class NLDSettingsTab extends PluginSettingTab {
 
   display(): void {
     const { containerEl } = this;
+    const localizedWeekdays = window.moment.weekdays();
+    const localeWeekStart = getLocaleWeekStart();
 
     containerEl.empty();
 
     containerEl.createEl("h2", {
-      text: "Nldates settings",
+      text: "Natural Language Dates",
     });
 
     containerEl.createEl("h3", {
@@ -68,16 +91,17 @@ export class NLDSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Week starts on")
       .setDesc("Which day to consider as the start of the week")
-      .addDropdown((day) =>
-        day
-          .addOption("Monday", "Monday")
-          .addOption("Sunday", "Sunday")
-          .setValue(this.plugin.settings.weekStart)
-          .onChange(async (value) => {
-            this.plugin.settings.weekStart = value;
-            await this.plugin.saveSettings();
-          })
-      );
+      .addDropdown((dropdown) => {
+        dropdown.addOption("locale-default", `Locale default (${localeWeekStart})`);
+        localizedWeekdays.forEach((day, i) => {
+          dropdown.addOption(weekdays[i], day);
+        });
+        dropdown.setValue(this.plugin.settings.weekStart.toLowerCase());
+        dropdown.onChange(async (value: DayOfWeek) => {
+          this.plugin.settings.weekStart = value;
+          await this.plugin.saveSettings();
+        });
+      });
 
     containerEl.createEl("h3", {
       text: "Hotkey formatting settings",

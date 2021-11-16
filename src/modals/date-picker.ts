@@ -1,20 +1,13 @@
 import { App, MarkdownView, Modal, Setting } from "obsidian";
-import NaturalLanguageDates from "../main";
+import { generateMarkdownLink } from "src/utils";
+import type NaturalLanguageDates from "../main";
 
 export default class DatePickerModal extends Modal {
-  activeView: MarkdownView;
-  activeEditor: CodeMirror.Editor;
-  activeCursor: CodeMirror.Position;
   plugin: NaturalLanguageDates;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app);
     this.plugin = plugin;
-    this.activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-    if (this.activeView) {
-      this.activeEditor = this.activeView.sourceMode.cmEditor;
-      this.activeCursor = this.activeEditor.getCursor();
-    }
   }
 
   onOpen(): void {
@@ -39,9 +32,11 @@ export default class DatePickerModal extends Modal {
         : "";
 
       if (insertAsLink) {
-        parsedDateString = shouldIncludeAlias
-          ? `[[${parsedDateString}|${cleanDateInput}]]`
-          : `[[${parsedDateString}]]`;
+        parsedDateString = generateMarkdownLink(
+          this.app,
+          parsedDateString,
+          shouldIncludeAlias ? cleanDateInput : undefined
+        );
       }
 
       return parsedDateString;
@@ -78,15 +73,13 @@ export default class DatePickerModal extends Modal {
           });
         });
       new Setting(formEl).setName("Add as link?").addToggle((toggleEl) => {
-        toggleEl
-          .setValue(this.plugin.settings.modalToggleLink)
-          .onChange((value) => {
-            insertAsLink = value;
-            this.plugin.settings.modalToggleLink = insertAsLink;
-            this.plugin.saveSettings();
+        toggleEl.setValue(this.plugin.settings.modalToggleLink).onChange((value) => {
+          insertAsLink = value;
+          this.plugin.settings.modalToggleLink = insertAsLink;
+          this.plugin.saveSettings();
 
-            previewEl.setText(getDateStr());
-          });
+          previewEl.setText(getDateStr());
+        });
       });
 
       formEl.createDiv("modal-button-container", (buttonContainerEl) => {
@@ -100,14 +93,12 @@ export default class DatePickerModal extends Modal {
         });
       });
 
+      const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+      const activeEditor = activeView.editor;
       formEl.addEventListener("submit", (e: Event) => {
         e.preventDefault();
         this.close();
-        this.plugin.insertDateString(
-          getDateStr(),
-          this.activeEditor,
-          this.activeCursor
-        );
+        activeEditor.replaceSelection(getDateStr());
       });
     });
   }

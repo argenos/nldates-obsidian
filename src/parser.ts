@@ -1,15 +1,14 @@
 import chrono, { Chrono } from "chrono-node";
 import type { Moment } from "moment";
 
+import { DayOfWeek } from "./settings";
+import { getLastDayOfMonth, getLocaleWeekStart } from "./utils";
+
 export interface NLDResult {
   formattedString: string;
   date: Date;
   moment: Moment;
 }
-
-const getLastDayOfMonth = function (y: number, m: number) {
-  return new Date(y, m, 0).getDate();
-};
 
 function getLocalizedChrono(): Chrono {
   const locale = window.moment.locale();
@@ -45,17 +44,26 @@ export default class NLDParser {
     this.chrono = getConfiguredChrono();
   }
 
-  getParsedDate(selectedText: string, weekStart: string): Date {
+  getParsedDate(selectedText: string, weekStartPreference: DayOfWeek): Date {
     const parser = this.chrono;
+    const initialParse = parser.parse(selectedText);
+    const weekdayIsCertain = initialParse[0]?.start.isCertain("weekday");
+
+    const weekStart =
+      weekStartPreference === "locale-default"
+        ? getLocaleWeekStart()
+        : weekStartPreference;
 
     const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
-    const lastDayOfMatch = selectedText.match(
-      /(last day of|end of)\s*([^\n\r]*)/i
-    );
+    const lastDayOfMatch = selectedText.match(/(last day of|end of)\s*([^\n\r]*)/i);
     const midOf = selectedText.match(/mid\s([\w]+)/i);
 
+    const referenceDate = weekdayIsCertain
+      ? window.moment().weekday(0).toDate()
+      : new Date();
+
     if (nextDateMatch && nextDateMatch[1] === "week") {
-      return parser.parseDate(`next ${weekStart}`, new Date(), {
+      return parser.parseDate(`next ${weekStart}`, referenceDate, {
         forwardDate: true,
       });
     }
@@ -95,6 +103,6 @@ export default class NLDParser {
       });
     }
 
-    return parser.parseDate(selectedText, new Date());
+    return parser.parseDate(selectedText, referenceDate);
   }
 }
