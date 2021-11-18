@@ -10,74 +10,51 @@ import {
 } from "obsidian";
 import type NaturalLanguageDates from "src/main";
 import t from "../lang/helper";
-
+import { generateMarkdownLink } from "src/utils";
 
 
 export default class DateSuggest extends EditorSuggest<string> {
-  plugin: NaturalLanguageDates;
-  app: App;
-
-  protected cmEditor: Editor;
-
-  private startPos: CodeMirror.Position;
-  private triggerPhrase: string;
+  private plugin: NaturalLanguageDates;
+  private app: App;
 
   constructor(app: App, plugin: NaturalLanguageDates) {
     super(app);
     this.app = app;
     this.plugin = plugin;
-    this.triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
-    this.updateInstructions();
-  }
 
-  open(): void {
-    super.open();
-    // update the instructions since they are settings-dependent
-    this.updateInstructions();
-  }
+    // @ts-ignore
+    this.scope.register(["Shift"], "Enter", (evt: KeyboardEvent) => {
+      // @ts-ignore
+      this.suggestions.useSelectedItem(evt);
+      return false;
+    });
 
-  protected updateInstructions(): void {
-    if (!this.plugin.settings.autosuggestToggleLink) {
-      // Instructions only apply for links
-      return;
+    if (this.plugin.settings.autosuggestToggleLink) {
+      this.setInstructions([{ command: "Shift", purpose: "Keep text as alias" }]);
     }
-
-    // this.setInstructions((containerEl) => {
-    //   containerEl.createDiv("prompt-instructions", (instructions) => {
-    //     instructions.createDiv("prompt-instruction", (instruction) => {
-    //       instruction.createSpan({
-    //         cls: "prompt-instruction-command",
-    //         text: "Shift",
-    //       });
-    //       instruction.createSpan({
-    //         text: "Keep text as alias",
-    //       });
-    //     });
-    //   });
-    // });
   }
 
   getSuggestions(context: EditorSuggestContext): string[] {
     // handle no matches
-    const suggestions = this.getDateSuggestions(context.query);
+    const suggestions = this.getDateSuggestions(context);
     return suggestions.length ? suggestions : [ context.query ];
   }
 
-  getDateSuggestions(inputStr: string): string[] {
+  getDateSuggestions(context: EditorSuggestContext): string[] {
     return this.unique(this.plugin.settings.languages.flatMap(
       language => {
-        let suggestions = this.getTimeSuggestions(inputStr, language);
+        let suggestions = this.getTimeSuggestions(context.query, language);
         if (suggestions)
           return suggestions;
-        suggestions = this.getImmediateSuggestions(inputStr, language);
-        if (suggestions)
-          return suggestions;
-
-        suggestions = this.getRelativeSuggestions(inputStr, language);
+        suggestions = this.getImmediateSuggestions(context.query, language);
         if (suggestions)
           return suggestions;
 
-        return this.defaultSuggestions(inputStr, language);
+        suggestions = this.getRelativeSuggestions(context.query, language);
+        if (suggestions)
+          return suggestions;
+
+        return this.defaultSuggestions(context.query, language);
       }
     ));
   }
@@ -148,21 +125,13 @@ export default class DateSuggest extends EditorSuggest<string> {
     el.setText(suggestion);
   }
 
-  selectSuggestion(
-    suggestion: string,
-    event: KeyboardEvent | MouseEvent
-  ): void {
-    const includeAlias = event.shiftKey;
-
-    const { workspace } = this.app;
-    const activeView = workspace.getActiveViewOfType(MarkdownView);
-
+  selectSuggestion(suggestion: string, event: KeyboardEvent | MouseEvent): void {
+    const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!activeView) {
       return;
     }
-    const editor = activeView.editor;
-    const head = this.startPos;
-    const anchor = editor.getCursor();
+
+    const includeAlias = event.shiftKey;
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
@@ -175,15 +144,14 @@ export default class DateSuggest extends EditorSuggest<string> {
     }
 
     if (makeIntoLink) {
-      if (includeAlias) {
-        dateStr = `[[${dateStr}|${suggestion}]]`;
-      } else {
-        dateStr = `[[${dateStr}]]`;
-      }
+      dateStr = generateMarkdownLink(
+        this.app,
+        dateStr,
+        includeAlias ? suggestion : undefined
+      );
     }
 
-    editor.replaceRange(dateStr, head, anchor);
-    this.close();
+    activeView.editor.replaceRange(dateStr, this.context.start, this.context.end);
   }
 
   onTrigger(
@@ -191,39 +159,36 @@ export default class DateSuggest extends EditorSuggest<string> {
     editor: Editor,
     file: TFile
   ): EditorSuggestTriggerInfo {
-    const lineContents = editor.getLine(cursor.line);
-
-    const match = lineContents
-      .substring(0, cursor.ch)
-      .match(/(?:^|\s|\W)(@[^@]*$)/);
-
-    if (match === null) {
+    if (!this.plugin.settings.isAutosuggestEnabled) {
       return null;
     }
 
-    const triggerInfo = this.getTriggerInfo(match, cursor);
-
-    this.startPos = triggerInfo.start;
-    this.cmEditor = editor;
-
-    return triggerInfo;
-  }
-
-  protected getTriggerInfo(
-    match: RegExpMatchArray,
-    cursor: EditorPosition
-  ): EditorSuggestTriggerInfo {
-    return {
-      start: this.getStartPos(match, cursor.line),
-      end: cursor,
-      query: match[1].substring(this.triggerPhrase.length),
+    const triggerPhrase = this.plugin.settings.autocompleteTriggerPhrase;
+    const startPos = this.context?.start || {
+      line: cursor.line,
+      ch: cursor.ch - triggerPhrase.length,
     };
-  }
 
-  protected getStartPos(match: RegExpMatchArray, line: number): EditorPosition {
+    if (!editor.getRange(startPos, cursor).startsWith(triggerPhrase)) {
+      return null;
+    }
+
+    const precedingChar = editor.getRange(
+      {
+        line: startPos.line,
+        ch: startPos.ch - 1,
+      },
+      startPos
+    );
+
+    if (precedingChar && /[`a-zA-Z0-9]/.test(precedingChar)) {
+      return null;
+    }
+
     return {
-      line: line,
-      ch: match.index + match[0].length - match[1].length,
+      start: startPos,
+      end: cursor,
+      query: editor.getRange(startPos, cursor).substring(triggerPhrase.length),
     };
   }
 
