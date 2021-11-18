@@ -46,6 +46,7 @@ export default class DateSuggest extends EditorSuggest<string> {
         let suggestions = this.getTimeSuggestions(context.query, language);
         if (suggestions)
           return suggestions;
+        
         suggestions = this.getImmediateSuggestions(context.query, language);
         if (suggestions)
           return suggestions;
