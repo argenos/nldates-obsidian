@@ -20,7 +20,7 @@
     "@typescript-eslint/eslint-plugin": "5.3.1",
     "@typescript-eslint/parser": "5.3.1",
     "eslint": "8.2.0",
-    "obsidian": "obsidianmd/obsidian-api#5687a75ecfdb78b6a832127cf6f9229e27e196a0",
+    "obsidian": "git+https://github.com/obsidianmd/obsidian-api.git#5687a75ecfdb78b6a832127cf6f9229e27e196a0",
     "prettier": "2.4.1",
     "rollup": "^2.60.0",
     "tslib": "^2.3.1",
