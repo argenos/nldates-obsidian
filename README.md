@@ -16,7 +16,7 @@ If a date is not recognized, the link won't be created.
 
 Expand dates using natural language inline within the editor view.
 
-Typing `@today` <kbd>Enter</kbd> will automatically be expanded to the current date.
+Typing `@today` <kbd>Enter</kbd> will automatically be expanded to the current date. Press <kbd>Shift</kbd> at the same time to keep the input text as an alias (e.g. `@today` → `[[202112-27|today]]`).
 
 ### Configuration
 
