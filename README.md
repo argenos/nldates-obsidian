@@ -157,7 +157,7 @@ Note that if you manipulate the `parsedResult.moment`, the `date` and `formatted
 ```sh
 git clone https://github.com/argenos/nldates-obsidian
 cd nldates-obsidian
-npm install
+yarn install
 
 npm run build
 mkdir -p /path/to/vault/.obsidian/plugins/nldates-obsidian
