@@ -1,5 +1,5 @@
 const dict = {
-  today: "Meute",
+  today: "Heute",
   tomorrow: "Morgen",
   yesterday: "Gestern",
 } as const;
