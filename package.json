@@ -27,7 +27,7 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "chrono-node": "2.3.2",
+    "chrono-node": "../chrono",
     "obsidian-daily-notes-interface": "0.9.4"
   }
 }

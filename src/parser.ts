@@ -2,7 +2,7 @@ import chrono, { Chrono } from "chrono-node";
 import type { Moment } from "moment";
 
 import { DayOfWeek } from "./settings";
-import { getLastDayOfMonth, getLocaleWeekStart } from "./utils";
+import { getLastDayOfMonth, getLocaleWeekStart, getWeekNumber } from "./utils";
 
 export interface NLDResult {
   formattedString: string;
@@ -54,6 +54,13 @@ export default class NLDParser {
         ? getLocaleWeekStart()
         : weekStartPreference;
 
+    const locale = {
+      weekStart: getWeekNumber(weekStart),
+    };
+
+    console.log("locale", locale);
+
+    const thisDateMatch = selectedText.match(/this\s([\w]+)/i);
     const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
     const lastDayOfMatch = selectedText.match(/(last day of|end of)\s*([^\n\r]*)/i);
     const midOf = selectedText.match(/mid\s([\w]+)/i);
@@ -61,6 +68,10 @@ export default class NLDParser {
     const referenceDate = weekdayIsCertain
       ? window.moment().weekday(0).toDate()
       : new Date();
+
+    if (thisDateMatch && thisDateMatch[1] === "week") {
+      return parser.parseDate(`this ${weekStart}`, referenceDate);
+    }
 
     if (nextDateMatch && nextDateMatch[1] === "week") {
       return parser.parseDate(`next ${weekStart}`, referenceDate, {
@@ -103,6 +114,6 @@ export default class NLDParser {
       });
     }
 
-    return parser.parseDate(selectedText, referenceDate);
+    return parser.parseDate(selectedText, referenceDate, { locale });
   }
 }
