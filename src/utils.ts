@@ -98,7 +98,7 @@ export function getWeekNumber(dayOfWeek: Omit<DayOfWeek, "locale-default">): num
 export function getLocaleWeekStart(): Omit<DayOfWeek, "locale-default"> {
   // @ts-ignore
   const startOfWeek = window.moment.localeData()._week.dow;
-  return window.moment.weekdays()[startOfWeek];
+  return daysOfWeek[startOfWeek];
 }
 
 export function generateMarkdownLink(app: App, subpath: string, alias?: string) {
