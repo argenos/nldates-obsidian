@@ -2,6 +2,36 @@
 # yarn lockfile v1
 
 
+"@codemirror/rangeset@^0.19.5":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.6.tgz#2562850cb4ce7dd30088f4d13a13860b67e7d384"
+  integrity sha512-wYtgGnW2Jtrh2nj7vpcBoEZib+jfyilrLN6w7YMTzzSRN8xXhYRorOUg4VQIa1JwFcMQrjSCkIdqXsDqOX1cYg==
+  dependencies:
+    "@codemirror/state" "^0.19.0"
+
+"@codemirror/state@^0.19.0", "@codemirror/state@^0.19.3", "@codemirror/state@^0.19.6":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-0.19.6.tgz#d631f041d39ce41b7891b099fca26cb1fdb9763e"
+  integrity sha512-sqIQZE9VqwQj7D4c2oz9mfLhlT1ElAzGB5lO1lE33BPyrdNy1cJyCIOecT4cn4VeJOFrnjOeu+IftZ3zqdFETw==
+  dependencies:
+    "@codemirror/text" "^0.19.0"
+
+"@codemirror/text@^0.19.0":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/text/-/text-0.19.6.tgz#9adcbd8137f69b75518eacd30ddb16fd67bbac45"
+  integrity sha512-T9jnREMIygx+TPC1bOuepz18maGq/92q2a+n4qTqObKwvNMg+8cMTslb8yxeEDEq7S3kpgGWxgO1UWbQRij0dA==
+
+"@codemirror/view@^0.19.31":
+  version "0.19.41"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-0.19.41.tgz#1afc984f7de9931f407d47c027df6f3a94625994"
+  integrity sha512-JvtZmKZUWce6s3LAU2IhQ44LCSU8YzjxvAe1mVg+HliPqH+ARUO/f5lTkq0+ZdUa00D6SlNyslHsMJEhfWNl2w==
+  dependencies:
+    "@codemirror/rangeset" "^0.19.5"
+    "@codemirror/state" "^0.19.3"
+    "@codemirror/text" "^0.19.0"
+    style-mod "^4.0.0"
+    w3c-keyname "^2.2.4"
+
 "@eslint/eslintrc@^1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.0.4.tgz#dfe0ff7ba270848d10c5add0715e04964c034b31"
@@ -297,8 +327,9 @@ chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-chrono-node@../chrono:
+"chrono-node@git+https://github.com/liamcain/chrono.git#50f8f5e539d0a4e01bd341e7927620185577088c":
   version "2.3.6"
+  resolved "git+https://github.com/liamcain/chrono.git#50f8f5e539d0a4e01bd341e7927620185577088c"
   dependencies:
     dayjs "^1.10.0"
 
@@ -807,10 +838,13 @@ obsidian-daily-notes-interface@0.9.4:
     obsidian obsidianmd/obsidian-api#master
     tslib "2.1.0"
 
-"obsidian@git+https://github.com/obsidianmd/obsidian-api.git#5687a75ecfdb78b6a832127cf6f9229e27e196a0":
-  version "0.12.17"
-  resolved "git+https://github.com/obsidianmd/obsidian-api.git#5687a75ecfdb78b6a832127cf6f9229e27e196a0"
+obsidian@0.13.21:
+  version "0.13.21"
+  resolved "https://registry.yarnpkg.com/obsidian/-/obsidian-0.13.21.tgz#1add830d8452270c608d5f5b25f75c3237af9677"
+  integrity sha512-ifrX4TclHZMlxRQt6mMYolucw3yy6VEbm/l/tl/BNTBT5uTHruP+k39DQ4wqPSeQApkR6VKlx/pY/DnSxqLOXw==
   dependencies:
+    "@codemirror/state" "^0.19.6"
+    "@codemirror/view" "^0.19.31"
     "@types/codemirror" "0.0.108"
     moment "2.29.1"
 
@@ -982,6 +1016,11 @@ strip-json-comments@^3.1.0, strip-json-comments@^3.1.1:
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
 
+style-mod@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/style-mod/-/style-mod-4.0.0.tgz#97e7c2d68b592975f2ca7a63d0dd6fcacfe35a01"
+  integrity sha512-OPhtyEjyyN9x3nhPsu76f52yUGXiZcgvsrFVtvTkyGRQJ0XK+GPc6ov1z+lRpbeabka+MYEQxOYRnt5nF30aMw==
+
 supports-color@^7.1.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"
@@ -1051,6 +1090,11 @@ v8-compile-cache@^2.0.3:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz#2de19618c66dc247dcfb6f99338035d8245a2cee"
   integrity sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==
+
+w3c-keyname@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.4.tgz#4ade6916f6290224cdbd1db8ac49eab03d0eef6b"
+  integrity sha512-tOhfEwEzFLJzf6d1ZPkYfGj+FWhIpBux9ppoP3rlclw3Z0BZv3N7b7030Z1kYth+6rDuAsXUFr+d0VE6Ed1ikw==
 
 which@^2.0.1:
   version "2.0.2"

@@ -58,8 +58,6 @@ export default class NLDParser {
       weekStart: getWeekNumber(weekStart),
     };
 
-    console.log("locale", locale);
-
     const thisDateMatch = selectedText.match(/this\s([\w]+)/i);
     const nextDateMatch = selectedText.match(/next\s([\w]+)/i);
     const lastDayOfMatch = selectedText.match(/(last day of|end of)\s*([^\n\r]*)/i);
