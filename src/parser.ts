@@ -1,8 +1,14 @@
-import chrono, { Chrono } from "chrono-node";
+import chrono, { Chrono, Parser } from "chrono-node";
 import type { Moment } from "moment";
 
 import { DayOfWeek } from "./settings";
-import { getLastDayOfMonth, getLocaleWeekStart, getWeekNumber } from "./utils";
+import {
+  ORDINAL_NUMBER_PATTERN,
+  getLastDayOfMonth,
+  getLocaleWeekStart,
+  getWeekNumber,
+  parseOrdinalNumberPattern,
+} from "./utils";
 
 export interface NLDResult {
   formattedString: string;
@@ -34,6 +40,16 @@ function getConfiguredChrono(): Chrono {
       };
     },
   });
+
+  localizedChrono.parsers.push({
+    pattern: () => new RegExp(ORDINAL_NUMBER_PATTERN),
+    extract: (_context, match) => {
+      return {
+        day: parseOrdinalNumberPattern(match[0]),
+        month: window.moment().month(),
+      };
+    },
+  } as Parser);
   return localizedChrono;
 }
 
