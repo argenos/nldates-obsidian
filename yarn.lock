@@ -327,9 +327,9 @@ chalk@^4.0.0:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
-"chrono-node@git+https://github.com/liamcain/chrono.git#50f8f5e539d0a4e01bd341e7927620185577088c":
+"chrono-node@git+https://github.com/liamcain/chrono.git#8460a7d95fbd5efbad073c79b90b2bf5e4dd12d0":
   version "2.3.6"
-  resolved "git+https://github.com/liamcain/chrono.git#50f8f5e539d0a4e01bd341e7927620185577088c"
+  resolved "git+https://github.com/liamcain/chrono.git#8460a7d95fbd5efbad073c79b90b2bf5e4dd12d0"
   dependencies:
     dayjs "^1.10.0"
 
