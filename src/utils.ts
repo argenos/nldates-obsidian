@@ -8,6 +8,16 @@ import {
 
 import { DayOfWeek } from "./settings";
 
+const daysOfWeek: Omit<DayOfWeek, "locale-default">[] = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+
 export default function getWordBoundaries(editor: any): EditorRange {
   const cursor = editor.getCursor();
 
@@ -79,6 +89,10 @@ export function getLastDayOfMonth(year: number, month: number) {
 
 export function parseTruthy(flag: string): boolean {
   return ["y", "yes", "1", "t", "true"].indexOf(flag.toLowerCase()) >= 0;
+}
+
+export function getWeekNumber(dayOfWeek: Omit<DayOfWeek, "locale-default">): number {
+  return daysOfWeek.indexOf(dayOfWeek);
 }
 
 export function getLocaleWeekStart(): Omit<DayOfWeek, "locale-default"> {
