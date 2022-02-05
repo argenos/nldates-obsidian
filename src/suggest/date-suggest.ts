@@ -151,6 +151,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       startPos
     );
 
+    // Short-circuit if `@` as a part of a word (e.g. part of an email address)
     if (precedingChar && /[`a-zA-Z0-9]/.test(precedingChar)) {
       return null;
     }
