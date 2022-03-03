@@ -39,7 +39,6 @@ It's now possible to use the [Obsidian URI](https://publish.obsidian.md/help/Adv
 
 `nldates` adds a few commands to work with dates in natural language. You can add custom hotkeys for them by going to `Settings > Hotkeys` and filtering by `Natural Language Dates` (Note that hotkeys are unset by default starting on **v0.4.1**).
 
-
 #### Natural Language Dates: Date Picker
 
 
@@ -133,6 +132,33 @@ const nldatesPlugin = obsidianApp.plugins.getPlugin("nldates-obsidian");
 const parsedResult = nldatesPlugin.parseDate("next year");
 console.log(parsedResult.moment.format("YYYY")); // This should return 2021
 ```
+
+### Typical String Formats and Tokens
+
+| Input       | Example          | Description |
+| ----------- | ---------------- | ----------- |
+| `YYYY`      | `2014`           | 4 or 2 digit year. Note: Only 4 digit can be parsed on `strict` mode |
+| `YY`        | `14`             | 2 digit year |
+| `Y`         | `-25`            | Year with any number of digits and sign |
+| `Q`         | `1..4`           | Quarter of year. Sets month to first month in quarter. |
+| `M MM`      | `1..12`          | Month number |
+| `MMM MMMM`  | `Jan..December`  | Month name in locale set by `moment.locale()` |
+| `D DD`      | `1..31`          | Day of month |
+| `Do`        | `1st..31st`      | Day of month with ordinal |
+| `DDD DDDD`  | `1..365`         | Day of year |
+| `X`         | `1410715640.579` | Unix timestamp |
+| `x`         | `1410715640579`  | Unix ms timestamp |
+| `gggg`      | `2014`           | Locale 4 digit week year |
+| `gg`        | `14`             | Locale 2 digit week year |
+| `w ww`      | `1..53`          | Locale week of year |
+| `e`         | `0..6`           | Locale day of week |
+| `ddd dddd`  | `Mon...Sunday`   | Day name in locale set by `moment.locale()` |
+| `GGGG`      | `2014`           | ISO 4 digit week year |
+| `GG`        | `14`             | ISO 2 digit week year |
+| `W WW`      | `1..53`          | ISO week of year |
+| `E`         | `1..7`           | ISO day of week |
+
+For further information, see: [moment.js docs](https://momentjs.com/docs/#/parsing/string-format/).
 
 ### Manipulating the `moment` instance
 
