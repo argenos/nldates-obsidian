@@ -9,13 +9,11 @@ import {
   TFile,
 } from "obsidian";
 import type NaturalLanguageDates from "src/main";
+import t from "../lang/helper";
 import { generateMarkdownLink } from "src/utils";
 
-interface IDateCompletion {
-  label: string;
-}
 
-export default class DateSuggest extends EditorSuggest<IDateCompletion> {
+export default class DateSuggest extends EditorSuggest<string> {
   private plugin: NaturalLanguageDates;
   private app: App;
 
@@ -36,66 +34,99 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     }
   }
 
-  getSuggestions(context: EditorSuggestContext): IDateCompletion[] {
+  getSuggestions(context: EditorSuggestContext): string[] {
+    // handle no matches
     const suggestions = this.getDateSuggestions(context);
-    if (suggestions.length) {
-      return suggestions;
-    }
-
-    // catch-all if there are no matches
-    return [{ label: context.query }];
+    return suggestions.length ? suggestions : [ context.query ];
   }
 
-  getDateSuggestions(context: EditorSuggestContext): IDateCompletion[] {
-    if (context.query.match(/^time/)) {
-      return ["now", "+15 minutes", "+1 hour", "-15 minutes", "-1 hour"]
-        .map((val) => ({ label: `time:${val}` }))
-        .filter((item) => item.label.toLowerCase().startsWith(context.query));
-    }
-    if (context.query.match(/(next|last|this)/i)) {
-      const reference = context.query.match(/(next|last|this)/i)[1];
+  getDateSuggestions(context: EditorSuggestContext): string[] {
+    return this.unique(this.plugin.settings.languages.flatMap(
+      language => {
+        let suggestions = this.getTimeSuggestions(context.query, language);
+        if (suggestions)
+          return suggestions;
+        
+        suggestions = this.getImmediateSuggestions(context.query, language);
+        if (suggestions)
+          return suggestions;
+
+        suggestions = this.getRelativeSuggestions(context.query, language);
+        if (suggestions)
+          return suggestions;
+
+        return this.defaultSuggestions(context.query, language);
+      }
+    ));
+  }
+
+  private getTimeSuggestions(inputStr: string, lang: string): string[] {
+    if (inputStr.match(new RegExp(`^${t("time", lang)}`))) {
       return [
-        "week",
-        "month",
-        "year",
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
+        t("now", lang),
+        t("plusminutes", lang, { timeDelta: "15" }),
+        t("plushour", lang, { timeDelta: "1" }),
+        t("minusminutes", lang, { timeDelta: "15" }),
+        t("minushour", lang, { timeDelta: "1" }),
       ]
-        .map((val) => ({ label: `${reference} ${val}` }))
-        .filter((items) => items.label.toLowerCase().startsWith(context.query));
+        .map(val => `${t("time", lang)}:${val}`)
+        .filter(item => item.toLowerCase().startsWith(inputStr));
     }
+  }
 
-    const relativeDate =
-      context.query.match(/^in ([+-]?\d+)/i) || context.query.match(/^([+-]?\d+)/i);
-    if (relativeDate) {
-      const timeDelta = relativeDate[1];
+  private getImmediateSuggestions(inputStr: string, lang: string): string[] {
+    const regexp = new RegExp(`(${t("next", lang)}|${t("last", lang)}|${t("this", lang)})`, "i")
+    const match = inputStr.match(regexp)
+    if (match) {
+      const reference = match[1]
       return [
-        { label: `in ${timeDelta} minutes` },
-        { label: `in ${timeDelta} hours` },
-        { label: `in ${timeDelta} days` },
-        { label: `in ${timeDelta} weeks` },
-        { label: `in ${timeDelta} months` },
-        { label: `${timeDelta} days ago` },
-        { label: `${timeDelta} weeks ago` },
-        { label: `${timeDelta} months ago` },
-      ].filter((items) => items.label.toLowerCase().startsWith(context.query));
+        t("week", lang),
+        t("month", lang),
+        t("year", lang),
+        t("sunday", lang),
+        t("monday", lang),
+        t("tuesday", lang),
+        t("wednesday", lang),
+        t("thursday", lang),
+        t("friday", lang),
+        t("saturday", lang),
+      ]
+        .map(val => `${reference} ${val}`)
+        .filter(items => items.toLowerCase().startsWith(inputStr));
     }
-
-    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
-      (items) => items.label.toLowerCase().startsWith(context.query)
-    );
   }
 
-  renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
-    el.setText(suggestion.label);
+  private getRelativeSuggestions(inputStr: string, lang: string): string[] {
+    const regexp = new RegExp(`^(${t("in", lang)} )?([+-]?\\d+)`, "i")
+    const relativeDate = inputStr.match(regexp);
+    if (relativeDate) {
+      const timeDelta = relativeDate[relativeDate.length - 1];
+      return [
+        t("inminutes", lang, { timeDelta }),
+        t("inhours", lang, { timeDelta }),
+        t("indays", lang, { timeDelta }),
+        t("inweeks", lang, { timeDelta }),
+        t("inmonths", lang, { timeDelta }),
+        t("daysago", lang, { timeDelta }),
+        t("weeksago", lang, { timeDelta }),
+        t("monthsago", lang, { timeDelta }),
+      ].filter(items => items.toLowerCase().startsWith(inputStr));
+    }
   }
 
-  selectSuggestion(suggestion: IDateCompletion, event: KeyboardEvent | MouseEvent): void {
+  private defaultSuggestions(inputStr: string, lang: string): string[] {
+    return [
+      t("today", lang),
+      t("yesterday", lang),
+      t("tomorrow", lang),
+    ].filter(item => item.toLowerCase().startsWith(inputStr));
+  }
+
+  renderSuggestion(suggestion: string, el: HTMLElement): void {
+    el.setText(suggestion);
+  }
+
+  selectSuggestion(suggestion: string, event: KeyboardEvent | MouseEvent): void {
     const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (!activeView) {
       return;
@@ -105,19 +136,19 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
-    if (suggestion.label.startsWith("time:")) {
-      const timePart = suggestion.label.substring(5);
+    if (this.suggestionIsTime(suggestion)) {
+      const timePart = suggestion.substring(5);
       dateStr = this.plugin.parseTime(timePart).formattedString;
       makeIntoLink = false;
     } else {
-      dateStr = this.plugin.parseDate(suggestion.label).formattedString;
+      dateStr = this.plugin.parseDate(suggestion).formattedString;
     }
 
     if (makeIntoLink) {
       dateStr = generateMarkdownLink(
         this.app,
         dateStr,
-        includeAlias ? suggestion.label : undefined
+        includeAlias ? suggestion : undefined
       );
     }
 
@@ -161,5 +192,15 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       end: cursor,
       query: editor.getRange(startPos, cursor).substring(triggerPhrase.length),
     };
+  }
+
+  protected suggestionIsTime(suggestion: string): boolean {
+    return this.plugin.settings.languages.some(lang => suggestion.startsWith(t("time", lang)))
+  }
+
+  protected unique(suggestions: string[]) : string[] {
+    return suggestions.filter(function(item, pos) {
+      return suggestions.indexOf(item) == pos;
+    })
   }
 }

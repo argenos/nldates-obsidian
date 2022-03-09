@@ -21,6 +21,14 @@ export interface NLDSettings {
   timeFormat: string;
   separator: string;
   weekStart: DayOfWeek;
+  languages: string[];
+
+  english: boolean;
+  japanese: boolean;
+  french: boolean;
+  german: boolean;
+  portuguese: boolean;
+  dutch: boolean;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
@@ -36,6 +44,14 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   timeFormat: "HH:mm",
   separator: " ",
   weekStart: "locale-default",
+  languages: ["en"],
+
+  english: true,
+  japanese: false,
+  french: false,
+  german: false,
+  portuguese: false,
+  dutch: false,
 
   modalToggleTime: false,
   modalToggleLink: false,
@@ -102,6 +118,17 @@ export class NLDSettingsTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         });
       });
+
+    containerEl.createEl("h3", {
+      text: "Language settings",
+    });
+
+    this.createLanguageSetting(containerEl, "English", "en");
+    this.createLanguageSetting(containerEl, "Japanese", "ja");
+    this.createLanguageSetting(containerEl, "French", "fr");
+    this.createLanguageSetting(containerEl, "German", "de", "partially supported");
+    this.createLanguageSetting(containerEl, "Portuguese", "pt", "partially supported");
+    this.createLanguageSetting(containerEl, "Dutch", "nl", "under development");
 
     containerEl.createEl("h3", {
       text: "Hotkey formatting settings",
@@ -177,5 +204,29 @@ export class NLDSettingsTab extends PluginSettingTab {
             await this.plugin.saveSettings();
           })
       );
+  }
+
+  protected createLanguageSetting(containerEl: HTMLElement, text: string, code: string, note?: string) : Setting {
+    note = note ? ` (${note})` : "";
+    return new Setting(containerEl)
+      .setName(text)
+      .setDesc(`Whether to parse ${text} or not` + note)
+      .addToggle(l =>
+        l
+          .setValue(this.plugin.settings[text.toLowerCase()])
+          .onChange(async (v) => {
+            this.plugin.settings[text.toLowerCase()] = v;
+            this.editLanguages(code, v);
+            await this.plugin.saveSettings();
+            await this.plugin.resetParser();
+          }));
+  }
+
+  protected editLanguages(code: string, enabled: boolean): void {
+    if (enabled) {
+      this.plugin.settings.languages.push(code);
+    } else {
+      this.plugin.settings.languages.remove(code);
+    }
   }
 }
