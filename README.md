@@ -185,7 +185,7 @@ git clone https://github.com/argenos/nldates-obsidian
 cd nldates-obsidian
 yarn install
 
-npm run build
+yarn build
 mkdir -p /path/to/vault/.obsidian/plugins/nldates-obsidian
 cp -t /path/to/vault/.obsidian/plugins/nldates-obsidian/ main.ts manifest.json
 ```
