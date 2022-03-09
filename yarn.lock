@@ -2,6 +2,36 @@
 # yarn lockfile v1
 
 
+"@codemirror/rangeset@^0.19.5":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/rangeset/-/rangeset-0.19.6.tgz#2562850cb4ce7dd30088f4d13a13860b67e7d384"
+  integrity sha512-wYtgGnW2Jtrh2nj7vpcBoEZib+jfyilrLN6w7YMTzzSRN8xXhYRorOUg4VQIa1JwFcMQrjSCkIdqXsDqOX1cYg==
+  dependencies:
+    "@codemirror/state" "^0.19.0"
+
+"@codemirror/state@^0.19.0", "@codemirror/state@^0.19.3", "@codemirror/state@^0.19.6":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-0.19.6.tgz#d631f041d39ce41b7891b099fca26cb1fdb9763e"
+  integrity sha512-sqIQZE9VqwQj7D4c2oz9mfLhlT1ElAzGB5lO1lE33BPyrdNy1cJyCIOecT4cn4VeJOFrnjOeu+IftZ3zqdFETw==
+  dependencies:
+    "@codemirror/text" "^0.19.0"
+
+"@codemirror/text@^0.19.0":
+  version "0.19.6"
+  resolved "https://registry.yarnpkg.com/@codemirror/text/-/text-0.19.6.tgz#9adcbd8137f69b75518eacd30ddb16fd67bbac45"
+  integrity sha512-T9jnREMIygx+TPC1bOuepz18maGq/92q2a+n4qTqObKwvNMg+8cMTslb8yxeEDEq7S3kpgGWxgO1UWbQRij0dA==
+
+"@codemirror/view@^0.19.31":
+  version "0.19.41"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-0.19.41.tgz#1afc984f7de9931f407d47c027df6f3a94625994"
+  integrity sha512-JvtZmKZUWce6s3LAU2IhQ44LCSU8YzjxvAe1mVg+HliPqH+ARUO/f5lTkq0+ZdUa00D6SlNyslHsMJEhfWNl2w==
+  dependencies:
+    "@codemirror/rangeset" "^0.19.5"
+    "@codemirror/state" "^0.19.3"
+    "@codemirror/text" "^0.19.0"
+    style-mod "^4.0.0"
+    w3c-keyname "^2.2.4"
+
 "@eslint/eslintrc@^1.0.4":
   "integrity" "sha512-h8Vx6MdxwWI2WM8/zREHMoqdgLNXEL4QX3MWSVMdyNJGvXVOs+6lp+m2hc3FnuMHDc4poxFNI20vCk0OmI4G0Q=="
   "resolved" "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-1.0.4.tgz"
@@ -297,10 +327,16 @@
     "ansi-styles" "^4.1.0"
     "supports-color" "^7.1.0"
 
+<<<<<<< HEAD
 "chrono-node@2.3.2":
   "integrity" "sha512-uZkVtF8dJ7llRzk3zrjGjV524I6NvojqMYk30tIfnUQ8ODrL8wvi/E2iEOTfcyiJaLf0dGDu9XVqNkVFNDMPCA=="
   "resolved" "https://registry.npmjs.org/chrono-node/-/chrono-node-2.3.2.tgz"
   "version" "2.3.2"
+=======
+"chrono-node@git+https://github.com/liamcain/chrono.git#8460a7d95fbd5efbad073c79b90b2bf5e4dd12d0":
+  version "2.3.6"
+  resolved "git+https://github.com/liamcain/chrono.git#8460a7d95fbd5efbad073c79b90b2bf5e4dd12d0"
+>>>>>>> e621a9609211174b964230f5bb890faa574fb7f1
   dependencies:
     "dayjs" "^1.10.0"
 
@@ -809,11 +845,20 @@
     "obsidian" "github:obsidianmd/obsidian-api#master"
     "tslib" "2.1.0"
 
+<<<<<<< HEAD
 "obsidian@0.12.17":
   "integrity" "sha512-YvCAlRym9D8zNPXt6Ez8QubSTVGoChx6lb58zqI13Dcrz3l1lgUO+pcOGDiD5Qa67nzDZLXo3aV2rqkCCpTvGQ=="
   "resolved" "https://registry.npmjs.org/obsidian/-/obsidian-0.12.17.tgz"
   "version" "0.12.17"
+=======
+obsidian@0.13.21:
+  version "0.13.21"
+  resolved "https://registry.yarnpkg.com/obsidian/-/obsidian-0.13.21.tgz#1add830d8452270c608d5f5b25f75c3237af9677"
+  integrity sha512-ifrX4TclHZMlxRQt6mMYolucw3yy6VEbm/l/tl/BNTBT5uTHruP+k39DQ4wqPSeQApkR6VKlx/pY/DnSxqLOXw==
+>>>>>>> e621a9609211174b964230f5bb890faa574fb7f1
   dependencies:
+    "@codemirror/state" "^0.19.6"
+    "@codemirror/view" "^0.19.31"
     "@types/codemirror" "0.0.108"
     "moment" "2.29.1"
 
@@ -989,10 +1034,22 @@
   "resolved" "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-3.1.1.tgz"
   "version" "3.1.1"
 
+<<<<<<< HEAD
 "supports-color@^7.1.0":
   "integrity" "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="
   "resolved" "https://registry.npmjs.org/supports-color/-/supports-color-7.2.0.tgz"
   "version" "7.2.0"
+=======
+style-mod@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/style-mod/-/style-mod-4.0.0.tgz#97e7c2d68b592975f2ca7a63d0dd6fcacfe35a01"
+  integrity sha512-OPhtyEjyyN9x3nhPsu76f52yUGXiZcgvsrFVtvTkyGRQJ0XK+GPc6ov1z+lRpbeabka+MYEQxOYRnt5nF30aMw==
+
+supports-color@^7.1.0:
+  version "7.2.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-7.2.0.tgz#1b7dcdcb32b8138801b3e478ba6a51caa89648da"
+  integrity sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==
+>>>>>>> e621a9609211174b964230f5bb890faa574fb7f1
   dependencies:
     "has-flag" "^4.0.0"
 
@@ -1059,10 +1116,22 @@
   "resolved" "https://registry.npmjs.org/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz"
   "version" "2.3.0"
 
+<<<<<<< HEAD
 "which@^2.0.1":
   "integrity" "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="
   "resolved" "https://registry.npmjs.org/which/-/which-2.0.2.tgz"
   "version" "2.0.2"
+=======
+w3c-keyname@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.4.tgz#4ade6916f6290224cdbd1db8ac49eab03d0eef6b"
+  integrity sha512-tOhfEwEzFLJzf6d1ZPkYfGj+FWhIpBux9ppoP3rlclw3Z0BZv3N7b7030Z1kYth+6rDuAsXUFr+d0VE6Ed1ikw==
+
+which@^2.0.1:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/which/-/which-2.0.2.tgz#7c6a8dd0a636a0327e10b59c9286eee93f3f51b1"
+  integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
+>>>>>>> e621a9609211174b964230f5bb890faa574fb7f1
   dependencies:
     "isexe" "^2.0.0"
 
