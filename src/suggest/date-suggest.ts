@@ -52,6 +52,11 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
         .map((val) => ({ label: `time:${val}` }))
         .filter((item) => item.label.toLowerCase().startsWith(context.query));
     }
+    if (context.query.match(/week/i)) {
+      return ["this", "next", "last"]
+      .map((val) => ({ label: `week:${val} week` }))
+      .filter((item) => item.label.toLowerCase().startsWith(context.query));
+    }
     if (context.query.match(/(next|last|this)/i)) {
       const reference = context.query.match(/(next|last|this)/i)[1];
       return [
@@ -86,7 +91,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
+    return [{ label: "week:this week"}, { label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
       (items) => items.label.toLowerCase().startsWith(context.query)
     );
   }
@@ -108,6 +113,10 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     if (suggestion.label.startsWith("time:")) {
       const timePart = suggestion.label.substring(5);
       dateStr = this.plugin.parseTime(timePart).formattedString;
+      makeIntoLink = false;
+    } else if (suggestion.label.startsWith("week:")) {
+      const weekPart = suggestion.label.substring(5);
+      dateStr = this.plugin.parseWeek(weekPart).formattedString;
       makeIntoLink = false;
     } else {
       dateStr = this.plugin.parseDate(suggestion.label).formattedString;

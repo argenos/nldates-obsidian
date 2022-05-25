@@ -19,6 +19,7 @@ export interface NLDSettings {
 
   format: string;
   timeFormat: string;
+  weekFormat: string;
   separator: string;
   weekStart: DayOfWeek;
 
@@ -34,6 +35,7 @@ export const DEFAULT_SETTINGS: NLDSettings = {
 
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
+  weekFormat: "GGGG-[W]WW",
   separator: " ",
   weekStart: "locale-default",
 
@@ -84,6 +86,19 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.format)
           .onChange(async (value) => {
             this.plugin.settings.format = value || "YYYY-MM-DD";
+            await this.plugin.saveSettings();
+          })
+      );
+    
+    new Setting(containerEl)
+      .setName("Week format")
+      .setDesc("Output format for parsed dates as weeks")
+      .addMomentFormat((text) =>
+        text
+          .setDefaultFormat("GGGG-[W]WW")
+          .setValue(this.plugin.settings.weekFormat)
+          .onChange(async (value) => {
+            this.plugin.settings.weekFormat = value || "GGGG-[W]WW";
             await this.plugin.saveSettings();
           })
       );
