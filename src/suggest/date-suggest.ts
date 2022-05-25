@@ -91,7 +91,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [{ label: "week:this week"}, { label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
+    return [{ label: "week:This Week"}, { label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
       (items) => items.label.toLowerCase().startsWith(context.query)
     );
   }

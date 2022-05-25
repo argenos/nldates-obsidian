@@ -83,17 +83,17 @@ export default class NLDParser {
       ? window.moment().weekday(0).toDate()
       : new Date();
 
-    if (thisDateMatch && thisDateMatch[1] === "week") {
+    if (thisDateMatch && thisDateMatch[1].toLowerCase() === "week") {
       return parser.parseDate(`this ${weekStart}`, referenceDate);
     }
 
-    if (nextDateMatch && nextDateMatch[1] === "week") {
+    if (nextDateMatch && nextDateMatch[1].toLowerCase() === "week") {
       return parser.parseDate(`next ${weekStart}`, referenceDate, {
         forwardDate: true,
       });
     }
 
-    if (nextDateMatch && nextDateMatch[1] === "month") {
+    if (nextDateMatch && nextDateMatch[1].toLowerCase() === "month") {
       const thisMonth = parser.parseDate("this month", new Date(), {
         forwardDate: true,
       });
@@ -102,7 +102,7 @@ export default class NLDParser {
       });
     }
 
-    if (nextDateMatch && nextDateMatch[1] === "year") {
+    if (nextDateMatch && nextDateMatch[1].toLowerCase() === "year") {
       const thisYear = parser.parseDate("this year", new Date(), {
         forwardDate: true,
       });
