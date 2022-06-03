@@ -91,7 +91,9 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [{ label: "week:This Week"}, { label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
+    const defaultSuggestions = [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }];
+    const additionalSuggestions = this.plugin.settings.additionalSuggestions.map(x => {return {label: x}});
+    return additionalSuggestions.concat(defaultSuggestions).filter(
       (items) => items.label.toLowerCase().startsWith(context.query)
     );
   }
@@ -136,7 +138,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   onTrigger(
     cursor: EditorPosition,
     editor: Editor,
-    file: TFile
+    _: TFile
   ): EditorSuggestTriggerInfo {
     if (!this.plugin.settings.isAutosuggestEnabled) {
       return null;

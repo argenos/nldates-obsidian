@@ -26,6 +26,8 @@ export interface NLDSettings {
   modalToggleTime: boolean;
   modalToggleLink: boolean;
   modalMomentFormat: string;
+
+  additionalSuggestions: string[];
 }
 
 export const DEFAULT_SETTINGS: NLDSettings = {
@@ -42,6 +44,8 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
+
+  additionalSuggestions: [],
 };
 
 const weekdays = [
@@ -189,6 +193,19 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.autocompleteTriggerPhrase || "@")
           .onChange(async (value) => {
             this.plugin.settings.autocompleteTriggerPhrase = value.trim();
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Additional Suggestions")
+      .setDesc("Additional default date autosuggests (comma separated list)")
+      .addText((text) =>
+        text
+          .setPlaceholder("")
+          .setValue(this.plugin.settings.additionalSuggestions.join(','))
+          .onChange(async (value) => {
+            this.plugin.settings.additionalSuggestions = value.split(',').filter(s => s);
             await this.plugin.saveSettings();
           })
       );
