@@ -119,7 +119,6 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     } else if (suggestion.label.startsWith("week:")) {
       const weekPart = suggestion.label.substring(5);
       dateStr = this.plugin.parseWeek(weekPart).formattedString;
-      makeIntoLink = false;
     } else {
       dateStr = this.plugin.parseDate(suggestion.label).formattedString;
     }
