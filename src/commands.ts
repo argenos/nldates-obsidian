@@ -15,7 +15,7 @@ export function getParseCommand(plugin: NaturalLanguageDates, mode: string): voi
   const cursor = editor.getCursor();
   const selectedText = getSelectedText(editor);
 
-  let date = plugin.parseDate(selectedText);
+  const date = plugin.parseDate(selectedText);
 
   if (!date.moment.isValid()) {
     // Do nothing
@@ -34,9 +34,13 @@ export function getParseCommand(plugin: NaturalLanguageDates, mode: string): voi
   } else if (mode == "clean") {
     newStr = `${date.formattedString}`;
   } else if (mode == "time") {
-    let time = plugin.parseTime(selectedText);
+    const time = plugin.parseTime(selectedText);
 
     newStr = `${time.formattedString}`;
+  } else if (mode == "week") {
+    const week = plugin.parseWeek(selectedText);
+
+    newStr = `${week.formattedString}`;
   }
 
   editor.replaceSelection(newStr);
@@ -73,6 +77,12 @@ export function getCurrentDateCommand(plugin: NaturalLanguageDates): void {
 
 export function getCurrentTimeCommand(plugin: NaturalLanguageDates): void {
   const format = plugin.settings.timeFormat;
+  const date = new Date();
+  insertMomentCommand(plugin, date, format);
+}
+
+export function getCurrentWeekCommand(plugin: NaturalLanguageDates): void {
+  const format = plugin.settings.weekFormat;
   const date = new Date();
   insertMomentCommand(plugin, date, format);
 }

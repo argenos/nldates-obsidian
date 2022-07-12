@@ -52,6 +52,11 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
         .map((val) => ({ label: `time:${val}` }))
         .filter((item) => item.label.toLowerCase().startsWith(context.query));
     }
+    if (context.query.match(/week/i)) {
+      return ["this", "next", "last"]
+      .map((val) => ({ label: `week:${val} week` }))
+      .filter((item) => item.label.toLowerCase().startsWith(context.query));
+    }
     if (context.query.match(/(next|last|this)/i)) {
       const reference = context.query.match(/(next|last|this)/i)[1];
       return [
@@ -86,7 +91,9 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
+    const defaultSuggestions = [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }];
+    const additionalSuggestions = this.plugin.settings.additionalSuggestions.map(x => {return {label: x}});
+    return additionalSuggestions.concat(defaultSuggestions).filter(
       (items) => items.label.toLowerCase().startsWith(context.query)
     );
   }
@@ -109,6 +116,9 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       const timePart = suggestion.label.substring(5);
       dateStr = this.plugin.parseTime(timePart).formattedString;
       makeIntoLink = false;
+    } else if (suggestion.label.startsWith("week:")) {
+      const weekPart = suggestion.label.substring(5);
+      dateStr = this.plugin.parseWeek(weekPart).formattedString;
     } else {
       dateStr = this.plugin.parseDate(suggestion.label).formattedString;
     }
@@ -127,7 +137,7 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
   onTrigger(
     cursor: EditorPosition,
     editor: Editor,
-    file: TFile
+    _: TFile
   ): EditorSuggestTriggerInfo {
     if (!this.plugin.settings.isAutosuggestEnabled) {
       return null;

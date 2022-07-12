@@ -19,12 +19,15 @@ export interface NLDSettings {
 
   format: string;
   timeFormat: string;
+  weekFormat: string;
   separator: string;
   weekStart: DayOfWeek;
 
   modalToggleTime: boolean;
   modalToggleLink: boolean;
   modalMomentFormat: string;
+
+  additionalSuggestions: string[];
 }
 
 export const DEFAULT_SETTINGS: NLDSettings = {
@@ -34,12 +37,15 @@ export const DEFAULT_SETTINGS: NLDSettings = {
 
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
+  weekFormat: "GGGG-[W]WW",
   separator: " ",
   weekStart: "locale-default",
 
   modalToggleTime: false,
   modalToggleLink: false,
   modalMomentFormat: "YYYY-MM-DD HH:mm",
+
+  additionalSuggestions: [],
 };
 
 const weekdays = [
@@ -84,6 +90,19 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.format)
           .onChange(async (value) => {
             this.plugin.settings.format = value || "YYYY-MM-DD";
+            await this.plugin.saveSettings();
+          })
+      );
+    
+    new Setting(containerEl)
+      .setName("Week format")
+      .setDesc("Output format for parsed dates as weeks")
+      .addMomentFormat((text) =>
+        text
+          .setDefaultFormat("GGGG-[W]WW")
+          .setValue(this.plugin.settings.weekFormat)
+          .onChange(async (value) => {
+            this.plugin.settings.weekFormat = value || "GGGG-[W]WW";
             await this.plugin.saveSettings();
           })
       );
@@ -174,6 +193,19 @@ export class NLDSettingsTab extends PluginSettingTab {
           .setValue(this.plugin.settings.autocompleteTriggerPhrase || "@")
           .onChange(async (value) => {
             this.plugin.settings.autocompleteTriggerPhrase = value.trim();
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Additional Suggestions")
+      .setDesc("Additional default date autosuggests (comma separated list)")
+      .addText((text) =>
+        text
+          .setPlaceholder("")
+          .setValue(this.plugin.settings.additionalSuggestions.join(','))
+          .onChange(async (value) => {
+            this.plugin.settings.additionalSuggestions = value.split(',').filter(s => s);
             await this.plugin.saveSettings();
           })
       );
