@@ -24,15 +24,30 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     this.app = app;
     this.plugin = plugin;
 
-    // @ts-ignore
-    this.scope.register(["Shift"], "Enter", (evt: KeyboardEvent) => {
+    for (const confirmModifier of ["Shift", "Alt"]) {
       // @ts-ignore
-      this.suggestions.useSelectedItem(evt);
-      return false;
-    });
+      this.scope.register([confirmModifier], "Enter", (evt: KeyboardEvent) => {
+        // @ts-ignore
+        this.suggestions.useSelectedItem(evt);
+        return false;
+      });
+    }
 
     if (this.plugin.settings.autosuggestToggleLink) {
-      this.setInstructions([{ command: "Shift", purpose: "Keep text as alias" }]);
+      this.setInstructions([
+        { command: "Shift", purpose: "Keep text as alias" },
+        {
+          command: "Alt",
+          purpose: "Keep text as plain text",
+        },
+      ]);
+    } else {
+      this.setInstructions([
+        {
+          command: "Alt",
+          purpose: "Insert as link",
+        },
+      ]);
     }
   }
 
@@ -102,8 +117,12 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     }
 
     const includeAlias = event.shiftKey;
+    const invertMakeIntoLink = event.altKey;
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
+    if (invertMakeIntoLink) {
+      makeIntoLink = !makeIntoLink;
+    }
 
     if (suggestion.label.startsWith("time:")) {
       const timePart = suggestion.label.substring(5);
