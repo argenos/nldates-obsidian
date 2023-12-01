@@ -17,7 +17,6 @@ export default class NaturalLanguageDates extends Plugin {
   public settings: NLDSettings;
 
   async onload(): Promise<void> {
-    console.log("Loading natural language date parser plugin");
     await this.loadSettings();
 
     this.addCommand({
@@ -142,15 +141,7 @@ export default class NaturalLanguageDates extends Plugin {
 
     if (date.moment.isValid()) {
       const dailyNote = await getOrCreateDailyNote(date.moment);
-
-      let leaf = workspace.activeLeaf;
-      if (newPane) {
-        leaf = workspace.splitActiveLeaf();
-      }
-
-      await leaf.openFile(dailyNote);
-
-      workspace.setActiveLeaf(leaf);
+      workspace.getLeaf(newPane).openFile(dailyNote);
     }
   }
 }
