@@ -18,42 +18,17 @@ const daysOfWeek: Omit<DayOfWeek, "locale-default">[] = [
   "saturday",
 ];
 
-export default function getWordBoundaries(editor: any): EditorRange {
+export default function getWordBoundaries(editor: Editor): EditorRange {
   const cursor = editor.getCursor();
 
-  let word;
-
-  if (editor.cm instanceof window.CodeMirror) {
-    // CM5
-    const line = cursor.line;
-    word = editor.cm.findWordAt({
-      line: line,
-      ch: cursor.ch,
-    });
-    const wordStart = word.anchor.ch;
-    const wordEnd = word.head.ch;
-
-    return {
-      from: {
-        line: line,
-        ch: wordStart,
-      },
-      to: {
-        line: line,
-        ch: wordEnd,
-      },
-    };
-  } else {
-    // CM6
     const pos = editor.posToOffset(cursor);
-    word = editor.cm.state.wordAt(pos);
+    const word = (editor as any).cm.state.wordAt(pos);
     const wordStart = editor.offsetToPos(word.from);
     const wordEnd = editor.offsetToPos(word.to);
     return {
       from: wordStart,
       to: wordEnd,
     };
-  }
 }
 
 export function getSelectedText(editor: Editor): string {
