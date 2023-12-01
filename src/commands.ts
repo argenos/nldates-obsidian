@@ -15,7 +15,7 @@ export function getParseCommand(plugin: NaturalLanguageDates, mode: string): voi
   const cursor = editor.getCursor();
   const selectedText = getSelectedText(editor);
 
-  let date = plugin.parseDate(selectedText);
+  const date = plugin.parseDate(selectedText);
 
   if (!date.moment.isValid()) {
     // Do nothing
@@ -34,7 +34,7 @@ export function getParseCommand(plugin: NaturalLanguageDates, mode: string): voi
   } else if (mode == "clean") {
     newStr = `${date.formattedString}`;
   } else if (mode == "time") {
-    let time = plugin.parseTime(selectedText);
+    const time = plugin.parseTime(selectedText);
 
     newStr = `${time.formattedString}`;
   }
