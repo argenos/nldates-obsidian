@@ -15,6 +15,7 @@ import { getFormattedDate, getOrCreateDailyNote, parseTruthy } from "./utils";
 export default class NaturalLanguageDates extends Plugin {
   private parser: NLDParser;
   public settings: NLDSettings;
+  private dateSuggest: DateSuggest;
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -82,7 +83,8 @@ export default class NaturalLanguageDates extends Plugin {
 
     this.addSettingTab(new NLDSettingsTab(this.app, this));
     this.registerObsidianProtocolHandler("nldates", this.actionHandler.bind(this));
-    this.registerEditorSuggest(new DateSuggest(this.app, this));
+    this.dateSuggest = new DateSuggest(this.app, this);
+    this.registerEditorSuggest(this.dateSuggest);
 
     this.app.workspace.onLayoutReady(() => {
       // initialize the parser when layout is ready so that the correct locale is used
@@ -92,6 +94,12 @@ export default class NaturalLanguageDates extends Plugin {
 
   onunload(): void {
     console.log("Unloading natural language date parser plugin");
+  }
+
+  updateDateSuggestInstructions(): void {
+    if (this.dateSuggest) {
+      this.dateSuggest.updateInstructions();
+    }
   }
 
   async loadSettings(): Promise<void> {

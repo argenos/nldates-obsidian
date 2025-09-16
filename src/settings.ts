@@ -16,6 +16,7 @@ export interface NLDSettings {
   autosuggestToggleLink: boolean;
   autocompleteTriggerPhrase: string;
   isAutosuggestEnabled: boolean;
+  swapEnterBehavior: boolean;
 
   format: string;
   timeFormat: string;
@@ -31,6 +32,7 @@ export const DEFAULT_SETTINGS: NLDSettings = {
   autosuggestToggleLink: true,
   autocompleteTriggerPhrase: "@",
   isAutosuggestEnabled: true,
+  swapEnterBehavior: false,
 
   format: "YYYY-MM-DD",
   timeFormat: "HH:mm",
@@ -162,6 +164,22 @@ export class NLDSettingsTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.autosuggestToggleLink = value;
             await this.plugin.saveSettings();
+            this.plugin.updateDateSuggestInstructions();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Swap Enter/Shift+Enter behavior")
+      .setDesc(
+        "If enabled, Enter will keep text as alias and Shift+Enter will use default behavior. Useful for mobile users who can't easily use Shift+Enter."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.swapEnterBehavior)
+          .onChange(async (value) => {
+            this.plugin.settings.swapEnterBehavior = value;
+            await this.plugin.saveSettings();
+            this.plugin.updateDateSuggestInstructions();
           })
       );
 
