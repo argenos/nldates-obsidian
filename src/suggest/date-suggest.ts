@@ -30,8 +30,20 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       return false;
     });
 
+    this.updateInstructions();
+  }
+
+  updateInstructions(): void {
     if (this.plugin.settings.autosuggestToggleLink) {
-      this.setInstructions([{ command: "Shift", purpose: "Keep text as alias" }]);
+      if (this.plugin.settings.swapEnterBehavior) {
+        this.setInstructions([
+          { command: "Enter", purpose: "Keep text as alias" },
+        ]);
+      } else {
+        this.setInstructions([
+          { command: "Shift", purpose: "Keep text as alias" },
+        ]);
+      }
     }
   }
 
@@ -70,7 +82,8 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
     }
 
     const relativeDate =
-      context.query.match(/^in ([+-]?\d+)/i) || context.query.match(/^([+-]?\d+)/i);
+      context.query.match(/^in ([+-]?\d+)/i) ||
+      context.query.match(/^([+-]?\d+)/i);
     if (relativeDate) {
       const timeDelta = relativeDate[1];
       return [
@@ -85,19 +98,33 @@ export default class DateSuggest extends EditorSuggest<IDateCompletion> {
       ].filter((items) => items.label.toLowerCase().startsWith(context.query));
     }
 
-    return [{ label: "Today" }, { label: "Yesterday" }, { label: "Tomorrow" }].filter(
-      (items) => items.label.toLowerCase().startsWith(context.query)
-    );
+    return [
+      { label: "Today" },
+      { label: "Yesterday" },
+      { label: "Tomorrow" },
+    ].filter((items) => items.label.toLowerCase().startsWith(context.query));
   }
 
   renderSuggestion(suggestion: IDateCompletion, el: HTMLElement): void {
     el.setText(suggestion.label);
   }
 
-  selectSuggestion(suggestion: IDateCompletion, event: KeyboardEvent | MouseEvent): void {
+  selectSuggestion(
+    suggestion: IDateCompletion,
+    event: KeyboardEvent | MouseEvent
+  ): void {
     const { editor } = this.context;
 
-    const includeAlias = event.shiftKey;
+    // Determine if we should include alias based on the swap setting
+    let includeAlias: boolean;
+    if (this.plugin.settings.swapEnterBehavior) {
+      // When swapped: Enter includes alias, Shift+Enter doesn't
+      includeAlias = !event.shiftKey;
+    } else {
+      // Default behavior: Enter doesn't include alias, Shift+Enter does
+      includeAlias = event.shiftKey;
+    }
+
     let dateStr = "";
     let makeIntoLink = this.plugin.settings.autosuggestToggleLink;
 
