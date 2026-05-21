@@ -1,5 +1,8 @@
 # Natural Language Dates in Obsidian
 
+> [!IMPORTANT]
+> This repository is no longer maintained. A community-maintained fork is available [here](https://github.com/obsidian-community/nldates). You can also give [Natural Language Dates Redux](https://github.com/tbergeron/obsidian-nldates-redux) a try.
+
 Insert timestamps and cross-link your daily notes with the flexibility of natural language. NLDates provides a suite of tools that makes working with dates and times within Obsidian frictionless.
 
 ## Features
